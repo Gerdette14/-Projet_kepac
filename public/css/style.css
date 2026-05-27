@@ -782,81 +782,9 @@ h3 {
   font-size: clamp(1.45rem, 2.5vw, 2.2rem);
 }
 
-.pricing-section {
-  background:
-    radial-gradient(circle at 88% 12%, rgba(214, 166, 64, 0.18), transparent 30%),
-    linear-gradient(135deg, #ffffff 0%, #edf6f2 100%);
-}
-
-.pricing-wrap {
-  display: grid;
-  grid-template-columns: minmax(0, 0.82fr) minmax(0, 1.18fr);
-  gap: 28px;
-  align-items: center;
-}
-
-.pricing-intro {
-  padding: 28px;
-  border: 1px solid rgba(17, 97, 73, 0.16);
-  border-radius: var(--radius);
-  background: rgba(255, 255, 255, 0.82);
-  box-shadow: var(--shadow);
-}
-
-.pricing-intro h2 {
-  margin-top: 8px;
-}
-
-.pricing-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
-}
-
-.pricing-card {
-  min-height: 178px;
-  padding: 22px;
-  border: 1px solid rgba(17, 97, 73, 0.16);
-  border-radius: var(--radius);
-  background: #fff;
-  box-shadow: 0 14px 32px rgba(23, 33, 38, 0.08);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
-}
-
-.pricing-card:hover {
-  border-color: rgba(17, 97, 73, 0.3);
-  box-shadow: var(--shadow-hover);
-  transform: translateY(-4px);
-}
-
-.pricing-card span {
-  display: inline-flex;
-  width: 34px;
-  height: 34px;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  border-radius: var(--radius);
-  background: var(--brand-soft);
-  color: var(--brand-dark);
-  font-size: 0.78rem;
-  font-weight: 900;
-}
-
-.pricing-card strong {
-  display: block;
-  margin-bottom: 8px;
-  color: var(--brand-dark);
-  font-size: 1.05rem;
-}
-
-.pricing-card p {
-  margin-bottom: 0;
-  color: var(--muted);
-}
-
 .testimonials-section {
-  background: #fff;
+  background:
+    linear-gradient(180deg, #ffffff 0%, #f1f7f4 100%);
 }
 
 .testimonial-grid {
@@ -882,10 +810,14 @@ h3 {
 }
 
 .testimonial-stars {
+  width: fit-content;
   margin-bottom: 14px;
-  color: var(--gold);
+  padding: 5px 10px;
+  border-radius: 999px;
+  background: #fff8e6;
+  color: #9a6a0a;
   font-weight: 900;
-  letter-spacing: 0.08em;
+  font-size: 0.84rem;
 }
 
 .testimonial-card p {
@@ -1317,7 +1249,6 @@ h3 {
   .hero-grid,
   .admin-hero,
   .profile-hero,
-  .pricing-wrap,
   .profile-layout,
   .catalog-layout,
   .cart-layout,
@@ -1331,10 +1262,6 @@ h3 {
   .product-grid,
   .category-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .pricing-grid {
-    grid-template-columns: 1fr;
   }
 
   .testimonial-grid {
@@ -1498,7 +1425,6 @@ h3 {
   .product-card,
   .category-tile,
   .value-item,
-  .pricing-card,
   .testimonial-card,
   .form-panel,
   .profile-box,
@@ -1539,8 +1465,7 @@ h3 {
   }
 
   .profile-hero,
-  .admin-hero,
-  .pricing-intro {
+  .admin-hero {
     padding: 18px;
     gap: 18px;
   }
