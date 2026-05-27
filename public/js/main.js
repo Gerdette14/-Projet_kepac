@@ -238,8 +238,25 @@ function categoryFallbackImage(category, name = "", index = 0) {
   return pool[index % pool.length] || PRODUCT_IMAGES[0];
 }
 
+function absoluteSiteUrl(path = "") {
+  if (!path) return window.location.origin;
+  if (/^https?:\/\//i.test(path)) return path;
+  return new URL(path.replace(/^\/+/, ""), `${window.location.origin}/`).href;
+}
+
 function whatsappLink(product) {
-  const message = `Bonjour KEPAC GROUP, je souhaite commander ce produit : ${product.name}. Merci de me confirmer la disponibilité.`;
+  const productUrl = absoluteSiteUrl(`produit.html?id=${product.id}`);
+  const imageUrl = absoluteSiteUrl(product.image || fallbackImage(product.id));
+  const message = [
+    "Bonjour KEPAC GROUP, je souhaite commander ce produit.",
+    "",
+    `Produit : ${product.name}`,
+    `Categorie : ${displayCategoryName(product.category)}`,
+    `Image du produit : ${imageUrl}`,
+    `Lien du produit : ${productUrl}`,
+    "",
+    "Merci de me confirmer la disponibilite."
+  ].join("\n");
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
 }
 
