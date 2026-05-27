@@ -10,9 +10,9 @@ document.addEventListener("DOMContentLoaded", () => {
   let currentCategories = [];
   const productCacheKey = "kepac-admin-products";
   const fallbackCategories = [
-    { id: 1, nom: "Vêtements" },
+    { id: 3, nom: "Vêtements" },
     { id: 2, nom: "Chaussures" },
-    { id: 8, nom: "Topographie" }
+    { id: 1, nom: "Topographie" }
   ];
 
   function adminHeaders(json = true) {
