@@ -1237,17 +1237,22 @@ h3 {
   .topbar .container,
   .nav,
   .container {
-    width: min(100% - 22px, 1180px);
+    width: 100%;
+    max-width: none;
+    padding-left: 20px;
+    padding-right: 20px;
   }
 
   .topbar {
-    font-size: 0.82rem;
+    font-size: 0.78rem;
   }
 
   .topbar .container {
     align-items: flex-start;
     flex-direction: column;
-    padding: 9px 0;
+    gap: 4px;
+    padding-top: 10px;
+    padding-bottom: 10px;
   }
 
   .stats {
@@ -1271,12 +1276,14 @@ h3 {
   }
 
   .brand-logo {
-    width: 128px;
+    width: 118px;
   }
 
   .nav {
     min-height: auto;
-    gap: 12px;
+    gap: 14px;
+    padding-top: 18px;
+    padding-bottom: 18px;
   }
 
   .nav-links {
@@ -1292,7 +1299,7 @@ h3 {
 
   .nav-actions {
     display: grid;
-    grid-template-columns: 1fr;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
     gap: 8px;
   }
 
@@ -1304,15 +1311,25 @@ h3 {
   }
 
   .section {
-    padding: 42px 0;
+    padding: 38px 0;
   }
 
   .hero {
-    padding: 28px 0 18px;
+    padding: 30px 0 18px;
   }
 
   .hero-grid {
-    gap: 24px;
+    gap: 22px;
+  }
+
+  .eyebrow {
+    font-size: 0.68rem;
+    line-height: 1.35;
+    letter-spacing: 0.1em;
+  }
+
+  .hero-actions {
+    margin-top: 22px;
   }
 
   .hero-actions .btn,
@@ -1417,6 +1434,13 @@ h3 {
 }
 
 @media (max-width: 380px) {
+  .topbar .container,
+  .nav,
+  .container {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
   h1 {
     font-size: 1.9rem;
   }
@@ -1426,10 +1450,14 @@ h3 {
   }
 
   .brand-logo {
-    width: 116px;
+    width: 108px;
   }
 
   .nav-links {
+    grid-template-columns: 1fr;
+  }
+
+  .nav-actions {
     grid-template-columns: 1fr;
   }
 }
