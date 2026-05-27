@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Connexion | KEPAC Boutique</title>
+  <script src="js/tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body class="min-h-screen antialiased text-slate-900">
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="index.html"><img class="brand-logo" src="images/kepac-logo.svg" alt="KEPAC Boutique"></a>
+      <div class="nav-links"><a href="index.html">Accueil</a><a href="catalogue.html">Catalogue</a></div>
+      <div class="nav-actions"><a class="btn btn-secondary" href="https://wa.me/qr/6VMOUHB2HLXTI1" target="_blank" rel="noopener">WhatsApp</a></div>
+    </nav>
+  </header>
+  <main class="section">
+    <div class="container auth-layout">
+      <form class="form-panel" data-auth-form>
+        <span class="eyebrow">Administration</span>
+        <h1>Connexion admin</h1>
+        <div class="field"><label>Email</label><input type="email" name="email" required placeholder="admin@kepac.com"></div>
+        <div class="field">
+          <label>Mot de passe</label>
+          <div class="password-row">
+            <input id="login-password" type="password" name="password" required placeholder="Votre mot de passe">
+            <button class="icon-btn" type="button" data-toggle-password="#login-password" aria-label="Afficher le mot de passe"></button>
+          </div>
+        </div>
+        <button class="btn btn-primary" type="submit" style="width:100%">Se connecter</button>
+        <p class="muted" style="margin-top:14px"><a data-forgot-password href="https://wa.me/qr/6VMOUHB2HLXTI1" target="_blank" rel="noopener">Mot de passe oublié ?</a></p>
+      </form>
+      <aside class="auth-aside auth-visual">
+        <img src="images/espace-client.png" alt="Espace administrateur KEPAC">
+        <div>
+          <h2>Espace administrateur</h2>
+          <p>Un espace simple pour publier, modifier et garder la vitrine KEPAC toujours propre. Les clients commandent directement sur WhatsApp.</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+  <script src="js/main.js?v=10"></script>
+  <script src="js/auth.js?v=4"></script>
+</body>
+</html>

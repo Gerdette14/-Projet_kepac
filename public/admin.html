@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Admin | KEPAC Boutique</title>
+  <script src="js/tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body class="admin-page min-h-screen antialiased text-slate-900">
+  <header class="site-header">
+    <nav class="nav">
+      <a class="brand" href="index.html"><img class="brand-logo" src="images/kepac-logo.svg" alt="KEPAC Boutique"></a>
+      <div class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="index.html">Boutique</a>
+        <a href="catalogue.html">Catalogue</a>
+        <a href="profil.html">Profil</a>
+        <a href="admin.html">Admin</a>
+      </div>
+      <div class="nav-actions"><button class="btn btn-ghost" type="button" data-logout>Déconnexion</button></div>
+    </nav>
+  </header>
+  <main class="section">
+    <div class="container">
+      <section class="admin-hero">
+        <div>
+          <span class="eyebrow">Administration</span>
+          <h1>Tableau de bord KEPAC</h1>
+          <p class="lead">Pilotez votre vitrine, publiez les bons produits et gardez chaque rayon clair pour vos clients.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="#admin-form">Ajouter un produit</a>
+            <a class="btn btn-ghost" href="catalogue.html">Voir la boutique</a>
+          </div>
+        </div>
+        <div class="admin-hero-visual">
+          <img src="images/espace-client.png" alt="Administration KEPAC">
+        </div>
+      </section>
+      <div class="profile-box" data-admin-gate hidden></div>
+
+      <div data-admin-panel>
+        <div class="admin-grid value-grid" data-admin-stats>
+          <div class="admin-card"><strong>...</strong><p class="muted">Produits publiés</p></div>
+          <div class="admin-card"><strong>...</strong><p class="muted">Commandes</p></div>
+          <div class="admin-card"><strong>...</strong><p class="muted">Clients</p></div>
+        </div>
+
+        <div class="admin-layout">
+          <form id="admin-form" class="form-panel admin-form-panel" data-admin-product-form>
+            <h2 data-form-title>Ajouter un produit</h2>
+            <p class="muted" data-form-help>Le produit sera visible dans l’accueil, le catalogue et sa catégorie après l’enregistrement.</p>
+            <input name="id" type="hidden">
+            <input name="image_actuelle" type="hidden">
+
+            <div class="field">
+              <label for="nom">Nom exact du produit</label>
+              <input id="nom" name="nom" type="text" placeholder="Ex : Laser topographique APEKS A40" required>
+            </div>
+            <input name="prix" type="hidden" value="0">
+
+            <div class="field">
+              <label for="categorie_id">Catégorie</label>
+              <select id="categorie_id" name="categorie_id" required>
+                <option value="1">Vêtements</option>
+                <option value="2">Chaussures</option>
+                <option value="8">Topographie</option>
+              </select>
+            </div>
+
+            <div class="field">
+              <label for="marque">Marque</label>
+              <input id="marque" name="marque" type="text" placeholder="Ex : KEPAC, APEKS, GUYISA">
+            </div>
+
+            <div class="field">
+              <label for="stock">Stock disponible</label>
+              <input id="stock" name="stock" type="number" min="0" value="1">
+            </div>
+
+            <input name="description" type="hidden" value="">
+
+            <div class="field">
+              <label for="image">Image du produit</label>
+              <input id="image" name="image" type="file" accept="image/*">
+              <small class="muted" data-image-help>Choisissez une image pour le nouveau produit.</small>
+            </div>
+
+            <div class="admin-form-actions">
+              <button class="btn btn-primary" type="submit" data-submit-label>Ajouter le produit</button>
+              <button class="btn btn-ghost" type="button" data-cancel-edit hidden>Annuler</button>
+            </div>
+          </form>
+
+          <section class="form-panel admin-list-panel">
+            <div class="section-head admin-list-head">
+              <div>
+                <span class="eyebrow">Catalogue</span>
+                <h2>Produits actuels</h2>
+              </div>
+              <a class="btn btn-ghost" href="catalogue.html">Voir la boutique</a>
+            </div>
+            <div class="admin-product-list" data-admin-products></div>
+          </section>
+        </div>
+      </div>
+    </div>
+  </main>
+  <script src="js/main.js?v=10"></script>
+  <script src="js/admin.js?v=5"></script>
+</body>
+</html>

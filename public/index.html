@@ -1,0 +1,138 @@
+﻿<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>KEPAC Boutique | E-commerce</title>
+  <meta name="description" content="Boutique KEPAC pour vêtements tendance, chaussures et équipements topographiques professionnels.">
+  <script src="js/tailwind-config.js"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css?v=3">
+</head>
+<body class="min-h-screen antialiased text-slate-900">
+  <div class="topbar">
+    <div class="container">
+      <span>Livraison locale rapide et confirmation par appel</span>
+      <span>Service client : +229 01 64 87 05 43</span>
+    </div>
+  </div>
+  <header class="site-header">
+    <nav class="nav" aria-label="Navigation principale">
+      <a class="brand" href="index.html"><img class="brand-logo" src="images/kepac-logo.svg" alt="KEPAC Boutique"></a>
+      <div class="nav-links">
+        <a href="index.html">Accueil</a>
+        <a href="catalogue.html">Catalogue</a>
+      </div>
+      <div class="nav-actions">
+        <a class="btn btn-secondary" href="https://wa.me/qr/6VMOUHB2HLXTI1" target="_blank" rel="noopener">WhatsApp</a>
+        <a class="btn btn-primary" href="connexion.html">Admin</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container hero-grid md:items-center">
+        <div>
+          <span class="eyebrow">Sélection premium au Bénin</span>
+          <h1>KEPAC Boutique</h1>
+          <p class="lead">Une boutique moderne et dynamique pour vos vêtements tendance et appareils topographiques professionnels.</p>
+          <div class="hero-actions">
+            <a class="btn btn-primary" href="catalogue.html">Voir le catalogue</a>
+            <a class="btn btn-ghost" href="https://wa.me/qr/6VMOUHB2HLXTI1" target="_blank" rel="noopener">Nous contacter</a>
+          </div>
+          <div class="stats">
+            <div class="stat"><strong>WhatsApp</strong><span>Commande et conseil rapides</span></div>
+            <div class="stat"><strong>Mode</strong><span>Vêtements tendance sélectionnés</span></div>
+            <div class="stat"><strong>Topo</strong><span>Équipements professionnels</span></div>
+          </div>
+        </div>
+        <div class="hero-media ring-1 ring-white/60">
+          <img src="images/espace-client.png" alt="Accueil professionnel KEPAC Boutique">
+          <div class="hero-badge">
+            <strong>Service client KEPAC</strong>
+            <p class="muted">Un accompagnement simple pour choisir et commander rapidement.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-muted">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Catégories</span>
+            <h2>Choisir en toute simplicité</h2>
+          </div>
+          <p>Des rayons clairs pour trouver rapidement la bonne tenue, la bonne chaussure ou le bon équipement de terrain.</p>
+        </div>
+        <div class="category-grid">
+          <a class="category-tile hover:-translate-y-1 hover:shadow-kepac-hover" href="catalogue.html"><strong>Vêtements tendance</strong><span>Chemises, pantalons et ensembles</span></a>
+          <a class="category-tile hover:-translate-y-1 hover:shadow-kepac-hover" href="catalogue.html"><strong>Chaussures</strong><span>Chaussures de sécurité et travail</span></a>
+          <a class="category-tile hover:-translate-y-1 hover:shadow-kepac-hover" href="catalogue.html"><strong>Équipements topographiques</strong><span>Lasers, prismes et accessoires</span></a>
+          <a class="category-tile hover:-translate-y-1 hover:shadow-kepac-hover" href="catalogue.html"><strong>WhatsApp</strong><span>Commande directe et rapide</span></a>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container">
+        <div class="section-head">
+          <div>
+            <span class="eyebrow">Produits populaires</span>
+            <h2>Sélection du moment</h2>
+          </div>
+          <a class="btn btn-secondary" href="catalogue.html">Tout voir</a>
+        </div>
+        <div class="home-category-stack">
+          <section class="catalog-group">
+            <div class="catalog-group-head">
+              <div><span class="eyebrow">Mode</span><h2>Vêtements</h2></div>
+              <a class="tag" href="catalogue.html">Voir tout</a>
+            </div>
+            <div class="product-grid" data-home-category="vetements"></div>
+          </section>
+
+          <section class="catalog-group">
+            <div class="catalog-group-head">
+              <div><span class="eyebrow">Mode</span><h2>Chaussures</h2></div>
+              <a class="tag" href="catalogue.html">Voir tout</a>
+            </div>
+            <div class="product-grid" data-home-category="chaussures"></div>
+          </section>
+
+          <section class="catalog-group">
+            <div class="catalog-group-head">
+              <div><span class="eyebrow">Professionnel</span><h2>Topographie</h2></div>
+              <a class="tag" href="catalogue.html">Voir tout</a>
+            </div>
+            <div class="product-grid" data-home-category="topographie"></div>
+          </section>
+        </div>
+      </div>
+    </section>
+
+    <section class="section section-muted">
+      <div class="container">
+        <div class="value-grid">
+          <div class="value-item"><strong>Paiement flexible</strong><span>Commande directe sur WhatsApp, confirmation avant livraison.</span></div>
+          <div class="value-item"><strong>Catalogue clair</strong><span>Produits bien rangés par univers pour gagner du temps.</span></div>
+          <div class="value-item"><strong>Design professionnel</strong><span>Navigation fluide sur téléphone, tablette et ordinateur.</span></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-grid">
+      <div><div class="footer-title">KEPAC Boutique</div><p>Votre boutique en ligne locale, simple à gérer et agréable à parcourir.</p></div>
+      <div><div class="footer-title">Boutique</div><p><a href="catalogue.html">Catalogue</a></p><p><a href="https://wa.me/qr/6VMOUHB2HLXTI1" target="_blank" rel="noopener">WhatsApp</a></p></div>
+      <div><div class="footer-title">Admin</div><p><a href="connexion.html">Connexion admin</a></p><p><a href="catalogue.html">Catalogue</a></p></div>
+      <div><div class="footer-title">Contact</div><p>Cotonou, Bénin</p><p>contact@kepac.local</p></div>
+    </div>
+    <div class="container footer-bottom">© 2026 KEPAC Boutique. Tous droits réservés.</div>
+  </footer>
+  <script src="js/main.js?v=10"></script>
+</body>
+</html>
+
