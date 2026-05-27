@@ -159,8 +159,9 @@ document.addEventListener("DOMContentLoaded", async () => {
         <img src="${product.image}" alt="${product.name}" onerror="this.src='${fallbackImage(product.id)}'">
       </div>
       <div>
-        <span class="eyebrow">${product.category}</span>
+        <span class="eyebrow">${displayCategoryName(product.category)}</span>
         <h1>${product.name}</h1>
+        <div class="product-price product-detail-price">${formatPrice(product.price)}</div>
         <p class="lead">${product.description} Sélection contrôlée, préparation rapide et accompagnement client avant la livraison.</p>
         <div class="hero-actions">
           <a class="btn btn-primary" href="${whatsappLink(product)}" target="_blank" rel="noopener">Commander sur WhatsApp</a>

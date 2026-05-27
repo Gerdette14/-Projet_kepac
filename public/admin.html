@@ -6,7 +6,7 @@
   <title>Admin | KEPAC Boutique</title>
   <script src="js/tailwind-config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/style.css?v=6">
+  <link rel="stylesheet" href="css/style.css?v=7">
 </head>
 <body class="admin-page min-h-screen antialiased text-slate-900">
   <header class="site-header">
@@ -58,7 +58,12 @@
               <label for="nom">Nom exact du produit</label>
               <input id="nom" name="nom" type="text" placeholder="Ex : Laser topographique APEKS A40" required>
             </div>
-            <input name="prix" type="hidden" value="0">
+
+            <div class="field">
+              <label for="prix">Prix du produit</label>
+              <input id="prix" name="prix" type="number" min="0" step="500" placeholder="Ex : 15000" required>
+              <small class="muted">Le prix sera affiché sous le produit dans la boutique.</small>
+            </div>
 
             <div class="field">
               <label for="categorie_id">Catégorie</label>
@@ -107,8 +112,8 @@
       </div>
     </div>
   </main>
-  <script src="js/main.js?v=11"></script>
-  <script src="js/admin.js?v=5"></script>
+  <script src="js/main.js?v=12"></script>
+  <script src="js/admin.js?v=6"></script>
 </body>
 </html>
 

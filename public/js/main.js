@@ -218,6 +218,39 @@ function fallbackImage(productId) {
   return PRODUCT_IMAGES[(Number(productId) - 1) % PRODUCT_IMAGES.length] || PRODUCT_IMAGES[0];
 }
 
+function fallbackPrice(productId) {
+  const prices = {
+    1: 15000,
+    2: 180000,
+    3: 15000,
+    4: 45000,
+    5: 35000,
+    6: 15000,
+    7: 25000,
+    8: 10000,
+    9: 15000,
+    10: 12000,
+    11: 5000,
+    12: 10000,
+    13: 10000,
+    14: 15000,
+    15: 220000,
+    16: 50000,
+    17: 65000,
+    18: 30000,
+    19: 12000,
+    20: 15000,
+    21: 12000
+  };
+  return prices[Number(productId)] || 10000;
+}
+
+function formatPrice(value) {
+  const price = Number(value || 0);
+  if (!price) return "Prix sur demande";
+  return `${price.toLocaleString("fr-FR")} F CFA`;
+}
+
 function categoryFallbackImage(category, name = "", index = 0) {
   const text = cleanText(name);
   const categoryName = cleanText(category);
@@ -252,6 +285,7 @@ function whatsappLink(product) {
     "",
     `Produit : ${product.name}`,
     `Categorie : ${displayCategoryName(product.category)}`,
+    `Prix : ${formatPrice(product.price)}`,
     `Image du produit : ${imageUrl}`,
     `Lien du produit : ${productUrl}`,
     "",
@@ -289,6 +323,7 @@ function productCard(product) {
         </div>
         <h3>${product.name}</h3>
         <p>${product.description}</p>
+        <div class="product-price">${formatPrice(product.price)}</div>
         <a class="btn btn-primary" href="${whatsappLink(product)}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
       </div>
     </article>
@@ -300,6 +335,7 @@ function normalizeProduct(product, index = 0) {
   const rawCategory = product.category || product.categorie_nom || product.categorie || "Produit";
   const name = product.name || product.nom || "Produit KEPAC";
   const description = product.description || "Produit disponible dans la boutique KEPAC.";
+  const rawPrice = Number(product.price ?? product.prix ?? 0);
   const normalizedCategory = inferCategoryStrict({
     category: rawCategory,
     name,
@@ -314,6 +350,7 @@ function normalizeProduct(product, index = 0) {
     badge: product.badge || (Number(product.stock) > 0 ? "Disponible" : "Stock limite"),
     image: image || categoryFallbackImage(normalizedCategory, name, index),
     description,
+    price: rawPrice > 0 ? rawPrice : fallbackPrice(product.id),
     origin: product.origin || (product.nom ? "server" : "local")
   };
 }
@@ -475,7 +512,7 @@ async function loadProductsFromApi() {
       PRODUCTS = mergeProducts(data.produits.map(normalizeProduct), cachedProducts);
     }
   } catch (error) {
-    PRODUCTS = mergeProducts(PRODUCTS, cachedProducts);
+    PRODUCTS = mergeProducts(PRODUCTS.map((product, index) => normalizeProduct(product, index)), cachedProducts);
     console.warn("Catalogue local utilise", error.message);
   }
 

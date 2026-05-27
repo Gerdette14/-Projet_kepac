@@ -118,12 +118,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   function productRow(product) {
     const image = product.image ? (product.image.startsWith("/") ? product.image : `/${product.image}`) : fallbackImage(product.id);
+    const productPrice = product.prix || product.price || (typeof fallbackPrice === "function" ? fallbackPrice(product.id) : 0);
+    const price = typeof formatPrice === "function" ? formatPrice(productPrice) : `${productPrice} F CFA`;
     return `
       <article class="admin-product-row">
         <img src="${image}" alt="${product.nom}" onerror="this.src='${fallbackImage(product.id)}'">
         <div>
           <strong>${product.nom}</strong>
-          <span>${product.categorie_nom || "Produit"} - Stock ${product.stock ?? 0}</span>
+          <span>${product.categorie_nom || "Produit"} - ${price} - Stock ${product.stock ?? 0}</span>
         </div>
         <div class="admin-row-actions">
           <a class="btn btn-ghost" href="produit.html?id=${product.id}">Voir</a>
@@ -148,6 +150,7 @@ document.addEventListener("DOMContentLoaded", () => {
       form.reset();
       form.elements.id.value = "";
       form.elements.image_actuelle.value = "";
+      form.elements.prix.value = "";
       if (title) title.textContent = "Ajouter un produit";
       if (help) help.textContent = "Le produit sera visible dans l’accueil, le catalogue et sa catégorie après l’enregistrement.";
       if (submitLabel) submitLabel.textContent = "Ajouter le produit";
@@ -160,7 +163,7 @@ document.addEventListener("DOMContentLoaded", () => {
     form.elements.id.value = product.id;
     form.elements.image_actuelle.value = product.image || "";
     form.elements.nom.value = product.nom || "";
-    form.elements.prix.value = 0;
+    form.elements.prix.value = product.prix || product.price || "";
     form.elements.categorie_id.value = product.categorie_id || "";
     form.elements.marque.value = product.marque || "";
     form.elements.stock.value = product.stock ?? 0;
@@ -307,6 +310,7 @@ document.addEventListener("DOMContentLoaded", () => {
         categorie_id: payload.categorie_id,
         categorie_nom: selectedCategoryName(payload.categorie_id),
         stock: payload.stock,
+        prix: payload.prix,
         marque: payload.marque,
         image: payload.image,
         actif: 1,
