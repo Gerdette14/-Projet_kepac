@@ -164,7 +164,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         <div class="product-price product-detail-price">${formatPrice(product.price)}</div>
         <p class="lead">${product.description} Sélection contrôlée, préparation rapide et accompagnement client avant la livraison.</p>
         <div class="hero-actions">
-          <a class="btn btn-primary" href="${whatsappLink(product)}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
+          <a class="btn btn-primary" href="${orderLink(product)}">Commander en ligne</a>
+          <a class="btn btn-secondary" href="${whatsappLink(product)}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
           <a class="btn btn-ghost" href="catalogue.html">Voir le catalogue</a>
         </div>
       </div>

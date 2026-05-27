@@ -302,6 +302,10 @@ function whatsappDirectLink() {
   return WHATSAPP_DIRECT_LINK;
 }
 
+function orderLink(product) {
+  return `commande.html?id=${encodeURIComponent(product.id)}`;
+}
+
 function displayCategoryName(category) {
   const value = cleanText(category);
   if (value.includes("vetement")) return "Vêtements";
@@ -324,7 +328,10 @@ function productCard(product) {
         <h3>${product.name}</h3>
         <p>${product.description}</p>
         <div class="product-price">${formatPrice(product.price)}</div>
-        <a class="btn btn-primary" href="${whatsappLink(product)}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
+        <div class="product-actions">
+          <a class="btn btn-primary" href="${orderLink(product)}">Commander en ligne</a>
+          <a class="btn btn-ghost" href="${whatsappLink(product)}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
+        </div>
       </div>
     </article>
   `;

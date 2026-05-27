@@ -717,8 +717,13 @@ h3 {
   font-size: 1.25rem;
 }
 
-.product-info .btn {
+.product-actions {
+  display: grid;
+  gap: 10px;
   margin-top: auto;
+}
+
+.product-info .btn {
   width: 100%;
 }
 
