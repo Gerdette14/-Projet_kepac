@@ -279,14 +279,12 @@ function absoluteSiteUrl(path = "") {
 
 function whatsappLink(product) {
   const productUrl = absoluteSiteUrl(`produit.html?id=${product.id}`);
-  const imageUrl = absoluteSiteUrl(product.image || fallbackImage(product.id));
   const message = [
     "Bonjour KEPAC GROUP, je souhaite commander ce produit.",
     "",
     `Produit : ${product.name}`,
     `Categorie : ${displayCategoryName(product.category)}`,
     `Prix : ${formatPrice(product.price)}`,
-    `Image du produit : ${imageUrl}`,
     `Lien du produit : ${productUrl}`,
     "",
     "Merci de me confirmer la disponibilite."
@@ -349,17 +347,45 @@ function normalizeProduct(product, index = 0) {
     description,
     image
   });
+  const finalImage = shouldReplaceProductImage(image, normalizedCategory, name)
+    ? categoryFallbackImage(normalizedCategory, name, index)
+    : image || categoryFallbackImage(normalizedCategory, name, index);
 
   return {
     id: product.id,
     name,
     category: normalizedCategory,
     badge: product.badge || (Number(product.stock) > 0 ? "Disponible" : "Stock limite"),
-    image: image || categoryFallbackImage(normalizedCategory, name, index),
+    image: finalImage,
     description,
     price: rawPrice > 0 ? rawPrice : fallbackPrice(product.id),
     origin: product.origin || (product.nom ? "server" : "local")
   };
+}
+
+function shouldReplaceProductImage(image = "", category = "", name = "") {
+  if (!image) return true;
+  if (image.includes("/uploads/") || image.includes("uploads/")) return false;
+
+  const text = cleanText(`${category} ${name}`);
+  const source = imageDisplayKey(image);
+  const isTopo = TOPOGRAPHY_IMAGE_NAMES.some((file) => source.endsWith(file.toLowerCase()));
+  const isVetement = source.includes("01.00.51") || source.includes("02.08.33");
+  const isChaussure = !isTopo && !isVetement && source.includes("whatsapp image 2026-05-25");
+
+  if (textHasAny(text, ["chemise", "robe", "ensemble", "tenue", "pantalon", "jeans", "t-shirt", "vetement"]) && !isVetement) {
+    return true;
+  }
+
+  if (textHasAny(text, ["chauss", "basket", "sandale", "guyisa"]) && !isChaussure) {
+    return true;
+  }
+
+  if (textHasAny(text, ["topo", "laser", "prisme", "gnss", "gps", "station", "niveau", "mesure", "apeks", "coffret"]) && !isTopo) {
+    return true;
+  }
+
+  return false;
 }
 
 function normalizeCategoryName(category) {

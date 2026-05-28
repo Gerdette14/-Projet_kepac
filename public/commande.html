@@ -3,10 +3,10 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Commande WhatsApp | KEPAC Boutique</title>
+  <title>Commander en ligne | KEPAC Boutique</title>
   <script src="js/tailwind-config.js"></script>
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="css/style.css?v=8">
+  <link rel="stylesheet" href="css/style.css?v=9">
 </head>
 <body class="min-h-screen antialiased text-slate-900">
   <header class="site-header">
@@ -16,25 +16,71 @@
       <div class="nav-actions"><a class="btn btn-secondary" href="https://wa.me/qr/6VMOUHB2HLXTI1" target="_blank" rel="noopener">WhatsApp</a><a class="btn btn-primary" href="connexion.html">Admin</a></div>
     </nav>
   </header>
+
   <main class="section">
     <div class="container">
       <div class="section-head">
         <div>
-          <span class="eyebrow">Commande</span>
-          <h1>Contact WhatsApp</h1>
-          <p class="lead">Les commandes se font maintenant directement sur WhatsApp pour confirmer vite les produits, les tailles, les couleurs et la livraison.</p>
+          <span class="eyebrow">Commande en ligne</span>
+          <h1>Finaliser votre commande</h1>
+          <p class="lead">Remplissez vos informations. KEPAC reçoit votre demande et vous contacte pour confirmer la disponibilité, la livraison et le paiement mobile.</p>
         </div>
-        <a class="btn btn-primary" href="https://wa.me/qr/6VMOUHB2HLXTI1" target="_blank" rel="noopener">Ouvrir WhatsApp</a>
+        <a class="btn btn-ghost" href="catalogue.html">Retour au catalogue</a>
       </div>
-      <div class="value-grid">
-        <div class="value-item"><strong>1</strong><span>Choisissez un produit dans le catalogue.</span></div>
-        <div class="value-item"><strong>2</strong><span>Cliquez sur Commander sur WhatsApp.</span></div>
-        <div class="value-item"><strong>3</strong><span>Confirmez la livraison avec KEPAC.</span></div>
+
+      <div class="order-layout">
+        <section class="form-panel order-product" data-order-product>
+          <div class="empty-state">
+            <h3>Chargement du produit</h3>
+            <p class="muted">Veuillez patienter quelques secondes.</p>
+          </div>
+        </section>
+
+        <form class="form-panel order-form" data-order-form>
+          <div>
+            <span class="eyebrow">Vos informations</span>
+            <h2>Coordonnées du client</h2>
+          </div>
+
+          <div class="field">
+            <label for="clientName">Nom complet</label>
+            <input id="clientName" name="clientName" type="text" placeholder="Ex : Grâce Houngbédji" required>
+          </div>
+
+          <div class="field">
+            <label for="clientPhone">Numéro de téléphone</label>
+            <input id="clientPhone" name="clientPhone" type="tel" placeholder="Ex : 01 64 87 05 43" required>
+          </div>
+
+          <div class="field">
+            <label for="paymentNetwork">Réseau de paiement</label>
+            <select id="paymentNetwork" name="paymentNetwork" required>
+              <option value="">Choisir un réseau</option>
+              <option value="MTN">MTN Mobile Money</option>
+              <option value="Moov">Moov Money</option>
+              <option value="Celtiis">Celtiis Cash</option>
+            </select>
+          </div>
+
+          <div class="field">
+            <label for="quantity">Quantité</label>
+            <input id="quantity" name="quantity" type="number" min="1" value="1" required>
+          </div>
+
+          <div class="field">
+            <label for="notes">Note pour KEPAC</label>
+            <textarea id="notes" name="notes" rows="4" placeholder="Ex : taille, couleur, lieu de livraison..."></textarea>
+          </div>
+
+          <button class="btn btn-primary" type="submit">Confirmer la commande</button>
+          <p class="muted">Après confirmation, KEPAC vous contacte pour valider le paiement MTN, Moov ou Celtiis.</p>
+          <div class="order-message" data-order-message></div>
+        </form>
       </div>
     </div>
   </main>
-  <script src="js/main.js?v=13"></script>
+
+  <script src="js/main.js?v=14"></script>
+  <script src="js/commande.js?v=1"></script>
 </body>
 </html>
-
-

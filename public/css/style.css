@@ -922,11 +922,69 @@ h3 {
 
 .cart-layout,
 .checkout-layout,
-.auth-layout {
+.auth-layout,
+.order-layout {
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 24px;
   align-items: start;
+}
+
+.order-layout {
+  grid-template-columns: minmax(0, 0.9fr) minmax(320px, 1.1fr);
+}
+
+.order-product {
+  overflow: hidden;
+  padding: 0;
+}
+
+.order-product-image {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  object-fit: cover;
+  background: #e8eeeb;
+}
+
+.order-product-info {
+  padding: 22px;
+}
+
+.order-product-info .btn,
+.order-form .btn {
+  width: 100%;
+}
+
+.order-message {
+  display: none;
+  padding: 12px;
+  border-radius: var(--radius);
+  font-weight: 700;
+}
+
+.order-message.success,
+.order-message.error,
+.order-message.info {
+  display: block;
+}
+
+.order-message.success {
+  background: #eaf4ef;
+  color: var(--brand-dark);
+}
+
+.order-message.error {
+  background: #fff1ee;
+  color: #9f311f;
+}
+
+.order-message.info {
+  background: #eef4f8;
+  color: #24445c;
+}
+
+.hidden {
+  display: none !important;
 }
 
 .cart-list {
@@ -1259,6 +1317,7 @@ h3 {
   .cart-layout,
   .checkout-layout,
   .auth-layout,
+  .order-layout,
   .admin-layout,
   .footer-grid {
     grid-template-columns: 1fr;
