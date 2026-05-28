@@ -133,7 +133,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   function renderCatalog() {
     if (!grid) return;
-    const list = uniqueCatalogProducts(uniqueProductsForDisplay(filteredProducts()));
+    const list = uniqueCatalogProducts(filteredProducts());
 
     if (!list.length) {
       grid.innerHTML = `<div class="empty-state"><h3>Aucun produit trouvé</h3><p class="muted">Essayez une autre recherche ou catégorie.</p></div>`;

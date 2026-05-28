@@ -536,13 +536,27 @@ function mergeProducts(primaryProducts, cachedProducts) {
   return uniqueProductsByImage([...productsByKey.values()]);
 }
 
+function dedupeProducts(products) {
+  const seen = new Set();
+
+  return products.filter((product) => {
+    const imageKey = imageDisplayKey(product.image || "");
+    const nameKey = cleanText(product.name || product.nom || "");
+    const key = imageKey || nameKey;
+    if (!key || seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+}
+
 async function loadProductsFromApi() {
   const cachedProducts = readCachedProducts().map((product, index) => normalizeProduct(product, index));
 
   try {
     const data = await requestJson("/api/produits");
     if (Array.isArray(data.produits) && data.produits.length) {
-      PRODUCTS = mergeProducts(data.produits.map(normalizeProduct), cachedProducts);
+      PRODUCTS = dedupeProducts(data.produits.map(normalizeProduct));
+      return PRODUCTS;
     }
   } catch (error) {
     PRODUCTS = mergeProducts(PRODUCTS.map((product, index) => normalizeProduct(product, index)), cachedProducts);
