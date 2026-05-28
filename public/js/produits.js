@@ -41,6 +41,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   }
 
   function catalogDisplayKey(product) {
+    if (product.image && typeof imageDisplayKey === "function") {
+      return imageDisplayKey(product.image);
+    }
+
     return product.image
       ? String(product.image).replace(/^\/+/, "").replace(/\\/g, "/").toLowerCase()
       : clean(`${product.name || "produit"}-${product.id || ""}`);
@@ -64,7 +68,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     grid.querySelectorAll(".product-card").forEach((card) => {
       const image = card.querySelector("img");
       const rawSource = image?.getAttribute("src") || "";
-      const source = rawSource.replace(/^\/+/, "").replace(/\\/g, "/").toLowerCase();
+      const source = typeof imageDisplayKey === "function"
+        ? imageDisplayKey(rawSource)
+        : rawSource.replace(/^\/+/, "").replace(/\\/g, "/").toLowerCase();
 
       if (!source) return;
       if (seenImages.has(source)) {

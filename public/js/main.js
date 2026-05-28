@@ -578,7 +578,17 @@ function uniqueProductsByImage(products) {
 }
 
 function imageDisplayKey(image = "") {
-  return String(image)
+  let value = String(image || "").trim();
+
+  try {
+    value = new URL(value, window.location.origin).pathname;
+  } catch (error) {
+    value = value.split("?")[0].split("#")[0];
+  }
+
+  return decodeURIComponent(value)
+    .split("?")[0]
+    .split("#")[0]
     .replace(/^\/+/, "")
     .replace(/\\/g, "/")
     .toLowerCase();
