@@ -401,4 +401,4 @@ router.delete('/:id', verifierToken, verifierAdmin, async (req, res) => {
   }
 });
 
-module.exports = router;
+module.exports = router; 
