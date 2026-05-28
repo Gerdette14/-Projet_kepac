@@ -5,6 +5,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const panel = document.querySelector("[data-admin-panel]");
   const form = document.querySelector("[data-admin-product-form]");
   const list = document.querySelector("[data-admin-products]");
+  const orderList = document.querySelector("[data-admin-orders]");
+  const orderCount = document.querySelector("[data-admin-orders-count]");
   const stats = document.querySelector("[data-admin-stats]");
   let currentProducts = [];
   let currentCategories = [];
@@ -136,6 +138,95 @@ document.addEventListener("DOMContentLoaded", () => {
     `;
   }
 
+  function firstOrderImage(order) {
+    const image = String(order.images || "").split(" | ").find(Boolean);
+    if (!image) return "images/kepac-logo.svg";
+    return image.startsWith("/") ? image : `/${image}`;
+  }
+
+  function orderCustomer(order) {
+    const notes = String(order.notes || "");
+    const clientLine = notes.split("\n").find((line) => normalizeText(line).startsWith("client :"));
+    if (clientLine) return clientLine.replace(/^client\s*:\s*/i, "");
+    return [order.prenom, order.nom].filter(Boolean).join(" ") || "Client en ligne";
+  }
+
+  function orderNetwork(order) {
+    const notes = String(order.notes || "");
+    const networkLine = notes.split("\n").find((line) => normalizeText(line).startsWith("reseau mobile :"));
+    if (networkLine) return networkLine.replace(/^r[ée]seau mobile\s*:\s*/i, "");
+    return order.mode_paiement === "mobile_money" ? "Mobile Money" : order.mode_paiement || "Paiement";
+  }
+
+  function orderProductName(order) {
+    return String(order.produits || "Produit commandé").split(" | ")[0] || "Produit commandé";
+  }
+
+  function orderDate(order) {
+    if (!order.created_at) return "";
+    return new Date(order.created_at).toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
+
+  function orderRow(order) {
+    const statusLabels = {
+      en_attente: "En attente",
+      confirmee: "Confirmée",
+      en_preparation: "En préparation",
+      expediee: "Expédiée",
+      livree: "Livrée",
+      annulee: "Annulée"
+    };
+    const total = typeof formatPrice === "function" ? formatPrice(order.total) : `${order.total || 0} F CFA`;
+
+    return `
+      <article class="admin-order-row">
+        <img src="${firstOrderImage(order)}" alt="${orderProductName(order)}" onerror="this.src='images/kepac-logo.svg'">
+        <div class="admin-order-main">
+          <div class="admin-order-title">
+            <strong>${orderProductName(order)}</strong>
+            <span class="tag">${statusLabels[order.statut] || order.statut || "En attente"}</span>
+          </div>
+          <p class="muted">${orderCustomer(order)} - ${order.telephone || "Téléphone non renseigné"} - ${orderNetwork(order)}</p>
+          <p class="muted">${total}${orderDate(order) ? ` - ${orderDate(order)}` : ""}</p>
+        </div>
+        <select class="admin-order-status" data-order-status="${order.id}">
+          <option value="en_attente" ${order.statut === "en_attente" ? "selected" : ""}>En attente</option>
+          <option value="confirmee" ${order.statut === "confirmee" ? "selected" : ""}>Confirmée</option>
+          <option value="en_preparation" ${order.statut === "en_preparation" ? "selected" : ""}>En préparation</option>
+          <option value="expediee" ${order.statut === "expediee" ? "selected" : ""}>Expédiée</option>
+          <option value="livree" ${order.statut === "livree" ? "selected" : ""}>Livrée</option>
+          <option value="annulee" ${order.statut === "annulee" ? "selected" : ""}>Annulée</option>
+        </select>
+      </article>
+    `;
+  }
+
+  async function loadOrders() {
+    if (!orderList) return;
+
+    try {
+      const response = await fetch("/api/admin/commandes", { headers: adminHeaders(false) });
+      const data = await readJsonResponse(response, "Commandes indisponibles.");
+      const commandes = data.commandes || [];
+
+      if (orderCount) {
+        orderCount.textContent = `${commandes.length} commande${commandes.length > 1 ? "s" : ""}`;
+      }
+
+      orderList.innerHTML = commandes.length
+        ? commandes.map(orderRow).join("")
+        : `<div class="empty-state"><h3>Aucune commande en ligne</h3><p class="muted">Les commandes clients apparaîtront ici après validation du formulaire.</p></div>`;
+    } catch (error) {
+      orderList.innerHTML = `<div class="empty-state"><h3>Commandes indisponibles</h3><p class="muted">${error.message}</p></div>`;
+    }
+  }
+
   function setFormMode(product = null) {
     const title = form?.querySelector("[data-form-title]");
     const help = form?.querySelector("[data-form-help]");
@@ -210,8 +301,8 @@ document.addEventListener("DOMContentLoaded", () => {
       if (stats) {
         stats.innerHTML = `
           <div class="admin-card"><span class="admin-card-icon">01</span><strong>${dashboard.stats?.produits ?? 0}</strong><p class="muted">Produits publiés</p></div>
-          <div class="admin-card"><span class="admin-card-icon">02</span><strong>${dashboard.stats?.commandes ?? 0}</strong><p class="muted">Demandes WhatsApp</p></div>
-          <div class="admin-card"><span class="admin-card-icon">03</span><strong>${dashboard.stats?.clients ?? 0}</strong><p class="muted">Contacts clients</p></div>
+          <div class="admin-card"><span class="admin-card-icon">02</span><strong>${dashboard.stats?.commandes ?? 0}</strong><p class="muted">Commandes en ligne</p></div>
+          <div class="admin-card"><span class="admin-card-icon">03</span><strong>${dashboard.stats?.clients ?? 0}</strong><p class="muted">Comptes clients</p></div>
         `;
       }
     } catch (error) {
@@ -240,6 +331,8 @@ document.addEventListener("DOMContentLoaded", () => {
         list.innerHTML = `<div class="empty-state">Les produits ne se chargent pas encore. Le formulaire reste disponible.</div>`;
       }
     }
+
+    await loadOrders();
   }
 
   async function uploadImage(file) {
@@ -363,6 +456,30 @@ document.addEventListener("DOMContentLoaded", () => {
       } catch (error) {
         toast(error.message);
       }
+    }
+  });
+
+  orderList?.addEventListener("change", async (event) => {
+    const select = event.target.closest("[data-order-status]");
+    if (!select) return;
+
+    try {
+      const response = await fetch(`/api/admin/commandes/${select.dataset.orderStatus}/statut`, {
+        method: "PUT",
+        headers: adminHeaders(),
+        body: JSON.stringify({ statut: select.value })
+      });
+      const data = await readJsonResponse(response, "Statut indisponible.");
+
+      if (!response.ok || !data.succes) {
+        throw new Error(data.message || "Statut impossible à modifier");
+      }
+
+      toast("Statut de commande mis à jour.");
+      await loadDashboard();
+    } catch (error) {
+      toast(error.message);
+      await loadOrders();
     }
   });
 

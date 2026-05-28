@@ -30,10 +30,31 @@ router.get('/dashboard', async (req, res) => {
 router.get('/commandes', async (req, res) => {
   try {
     const [commandes] = await db.query(
-      `SELECT c.*, u.nom, u.prenom, u.email
+      `SELECT
+         c.*,
+         u.nom,
+         u.prenom,
+         u.email,
+         (
+           SELECT GROUP_CONCAT(ci.nom_produit SEPARATOR ' | ')
+           FROM commande_items ci
+           WHERE ci.commande_id = c.id
+         ) AS produits,
+         (
+           SELECT GROUP_CONCAT(ci.quantite SEPARATOR ' | ')
+           FROM commande_items ci
+           WHERE ci.commande_id = c.id
+         ) AS quantites,
+         (
+           SELECT GROUP_CONCAT(COALESCE(p.image, '') SEPARATOR ' | ')
+           FROM commande_items ci
+           LEFT JOIN produits p ON p.id = ci.produit_id
+           WHERE ci.commande_id = c.id
+         ) AS images
        FROM commandes c
        LEFT JOIN utilisateurs u ON u.id = c.utilisateur_id
-       ORDER BY c.created_at DESC`
+       ORDER BY c.created_at DESC
+       LIMIT 30`
     );
 
     res.json({ succes: true, commandes });
