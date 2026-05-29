@@ -148,6 +148,7 @@ document.addEventListener("DOMContentLoaded", () => {
   function firstOrderImage(order) {
     const image = String(order.images || "").split(" | ").find(Boolean);
     if (!image) return "images/kepac-logo.svg";
+    if (/^https?:\/\//i.test(image)) return image;
     return image.startsWith("/") ? image : `/${image}`;
   }
 
