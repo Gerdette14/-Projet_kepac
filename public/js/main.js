@@ -32,6 +32,17 @@ const CATEGORY_FALLBACK_IMAGES = {
   ],
   Topographie: TOPOGRAPHY_IMAGE_NAMES.map((name) => `images/${name}`)
 };
+const REMOVED_IMAGE_NAMES = new Set([
+  "whatsapp image 2026-05-25 at 00.53.20.jpeg",
+  "whatsapp image 2026-05-25 at 00.53.21 (1).jpeg",
+  "whatsapp image 2026-05-25 at 02.06.15.jpeg",
+  "whatsapp image 2026-05-25 at 02.08.30.jpeg",
+  "whatsapp image 2026-05-25 at 02.08.31 (2).jpeg",
+  "whatsapp image 2026-05-25 at 02.08.31.jpeg",
+  "whatsapp image 2026-05-25 at 02.08.32 (1).jpeg",
+  "whatsapp image 2026-05-25 at 02.08.32.jpeg",
+  "whatsapp image 2026-05-25 at 02.08.33 (1).jpeg"
+]);
 
 function toast(message) {
   let node = document.querySelector(".toast");
@@ -147,7 +158,7 @@ function productCard(product) {
   return `
     <article class="product-card group transition duration-300 hover:-translate-y-1 hover:shadow-kepac-hover">
       <a class="product-media block" href="produit.html?id=${product.id}">
-        <img class="transition duration-500 group-hover:scale-105" src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.src='${fallbackImage(product.id)}'">
+        <img class="transition duration-500 group-hover:scale-105" src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.closest('.product-card')?.remove()">
       </a>
       <div class="product-info">
         <div class="product-meta">
@@ -371,6 +382,9 @@ function dedupeProducts(products) {
   const seen = new Set();
 
   return products.filter((product) => {
+    const fileName = imageDisplayKey(product.image || "").split("/").pop();
+    if (REMOVED_IMAGE_NAMES.has(fileName)) return false;
+
     const imageKey = imageDisplayKey(product.image || "");
     const nameKey = cleanText(product.name || product.nom || "");
     const key = imageKey || nameKey;
