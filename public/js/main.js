@@ -151,6 +151,7 @@ function displayCategoryName(category) {
   if (value.includes("vetement")) return "Vêtements";
   if (value.includes("chaussure")) return "Chaussures";
   if (value.includes("topographie")) return "Topographie";
+  if (value.includes("autre") || value.includes("divers")) return "Autres";
   return category || "Produit";
 }
 

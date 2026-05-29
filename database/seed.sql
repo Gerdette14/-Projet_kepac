@@ -3,11 +3,13 @@ USE kepac_ecommerce;
 INSERT IGNORE INTO categories (id, nom, slug, description, parent_id) VALUES
   (1, 'Equipements topographiques', 'equipements-topographiques', 'Appareils et accessoires topographiques', NULL),
   (2, 'Chaussures', 'chaussures', 'Chaussures de securite et de travail', NULL),
-  (3, 'Vetements', 'vetements', 'Chemises, pantalons, t-shirts et ensembles', NULL);
+  (3, 'Vetements', 'vetements', 'Chemises, pantalons, t-shirts et ensembles', NULL),
+  (4, 'Autres', 'autres', 'Autres produits KEPAC', NULL);
 
 UPDATE categories SET nom = 'Equipements topographiques', slug = 'equipements-topographiques', description = 'Appareils et accessoires topographiques' WHERE id = 1;
 UPDATE categories SET nom = 'Chaussures', slug = 'chaussures', description = 'Chaussures de securite et de travail' WHERE id = 2;
 UPDATE categories SET nom = 'Vetements', slug = 'vetements', description = 'Chemises, pantalons, t-shirts et ensembles' WHERE id = 3;
+UPDATE categories SET nom = 'Autres', slug = 'autres', description = 'Autres produits KEPAC' WHERE id = 4;
 
 -- Mot de passe admin initial : a changer apres la premiere connexion.
 INSERT IGNORE INTO utilisateurs (id, nom, prenom, email, mot_de_passe, role, telephone) VALUES

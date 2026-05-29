@@ -15,7 +15,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const fallbackCategories = [
     { id: 3, nom: "Vêtements" },
     { id: 2, nom: "Chaussures" },
-    { id: 1, nom: "Topographie" }
+    { id: 1, nom: "Topographie" },
+    { id: 4, nom: "Autres" }
   ];
 
   function adminHeaders(json = true) {
@@ -68,7 +69,8 @@ document.addEventListener("DOMContentLoaded", () => {
     return [
       findCategory(["vetement", "robe", "chemise"], fallbackCategories[0]),
       findCategory(["chaussure", "basket", "sandale"], fallbackCategories[1]),
-      findCategory(["topo", "equipement", "gnss", "gps", "laser", "prisme"], fallbackCategories[2])
+      findCategory(["topo", "equipement", "gnss", "gps", "laser", "prisme"], fallbackCategories[2]),
+      findCategory(["autre", "divers"], fallbackCategories[3])
     ];
   }
 
