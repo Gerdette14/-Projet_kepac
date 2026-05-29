@@ -61,6 +61,13 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
+  function hideBrokenImageCard(image) {
+    const card = image.closest(".product-card");
+    if (!card) return;
+    card.remove();
+    removeDuplicateImageCards();
+  }
+
   function removeDuplicateImageCards() {
     if (!grid) return;
 
@@ -92,7 +99,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (!grid) return;
     grid.querySelectorAll(".product-card img").forEach((image) => {
       image.addEventListener("load", removeDuplicateImageCards, { once: true });
-      image.addEventListener("error", removeDuplicateImageCards, { once: true });
+      image.addEventListener("error", () => hideBrokenImageCard(image), { once: true });
     });
   }
 
