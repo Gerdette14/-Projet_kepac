@@ -120,7 +120,11 @@ document.addEventListener("DOMContentLoaded", () => {
   }
 
   function productRow(product) {
-    const image = product.image ? (product.image.startsWith("/") ? product.image : `/${product.image}`) : fallbackImage(product.id);
+    const image = product.image
+      ? (/^https?:\/\//i.test(product.image)
+        ? product.image
+        : (product.image.startsWith("/") ? product.image : `/${product.image}`))
+      : fallbackImage(product.id);
     const productPrice = product.prix || product.price || (typeof fallbackPrice === "function" ? fallbackPrice(product.id) : 0);
     const price = typeof formatPrice === "function" ? formatPrice(productPrice) : `${productPrice} F CFA`;
     return `
