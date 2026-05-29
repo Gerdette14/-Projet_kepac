@@ -155,10 +155,11 @@ function displayCategoryName(category) {
 }
 
 function productCard(product) {
+  const fallback = /^https?:\/\//i.test(product.image) ? "" : `this.src='${fallbackImage(product.id)}'`;
   return `
     <article class="product-card group transition duration-300 hover:-translate-y-1 hover:shadow-kepac-hover">
       <a class="product-media block" href="produit.html?id=${product.id}">
-        <img class="transition duration-500 group-hover:scale-105" src="${product.image}" alt="${product.name}" loading="lazy" onerror="this.closest('.product-card')?.remove()">
+        <img class="transition duration-500 group-hover:scale-105" src="${product.image}" alt="${product.name}" loading="lazy" onerror="${fallback || "this.closest('.product-card')?.remove()"}">
       </a>
       <div class="product-info">
         <div class="product-meta">
@@ -179,6 +180,7 @@ function productCard(product) {
 
 function normalizeProduct(product, index = 0) {
   const image = product.image?.startsWith("/") ? product.image.slice(1) : product.image;
+  const hasRemoteImage = /^https?:\/\//i.test(image || "");
   const rawCategory = product.category || product.categorie_nom || product.categorie || "Produit";
   const name = product.name || product.nom || "Produit KEPAC";
   const description = product.description || "Produit disponible dans la boutique KEPAC.";
@@ -189,7 +191,7 @@ function normalizeProduct(product, index = 0) {
     description,
     image
   });
-  const finalImage = shouldReplaceProductImage(image, normalizedCategory, name)
+  const finalImage = !hasRemoteImage && shouldReplaceProductImage(image, normalizedCategory, name)
     ? categoryFallbackImage(normalizedCategory, name, index)
     : image || categoryFallbackImage(normalizedCategory, name, index);
 

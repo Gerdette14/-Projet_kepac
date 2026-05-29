@@ -16,6 +16,10 @@ async function ensureImageHashColumn() {
   }
 }
 
+function hasCloudinaryConfig() {
+  return Boolean(process.env.CLOUDINARY_CLOUD_NAME && process.env.CLOUDINARY_API_KEY && process.env.CLOUDINARY_API_SECRET);
+}
+
 // Upload vers Cloudinary depuis le buffer memoire
 function uploadToCloudinary(buffer) {
   return new Promise((resolve, reject) => {
@@ -37,6 +41,11 @@ function uploadToCloudinary(buffer) {
 async function verifierDoublonImage(req, res, next) {
   if (!req.file) return next();
   try {
+    if (!hasCloudinaryConfig()) {
+      req.imageUrl = "";
+      return next();
+    }
+
     await ensureImageHashColumn();
     const result = await uploadToCloudinary(req.file.buffer);
     const hash = result.etag || result.public_id || result.asset_id;
@@ -75,7 +84,7 @@ router.post(
     }
     res.status(201).json({
       succes: true,
-      image: req.imageUrl,
+      image: req.imageUrl || `/images/uploads/${req.file.filename || ''}`,
       image_hash: req.imageHash
     });
   }
