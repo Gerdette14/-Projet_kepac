@@ -10,6 +10,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const stats = document.querySelector("[data-admin-stats]");
   let currentProducts = [];
   let currentCategories = [];
+  let currentOrders = [];
   const productCacheKey = "kepac-admin-products";
   const fallbackCategories = [
     { id: 3, nom: "Vêtements" },
@@ -162,6 +163,53 @@ document.addEventListener("DOMContentLoaded", () => {
     return String(order.produits || "Produit commandé").split(" | ")[0] || "Produit commandé";
   }
 
+  function clientWhatsappNumber(phone = "") {
+    let digits = String(phone).replace(/\D/g, "");
+    if (!digits) return "";
+    if (digits.startsWith("00")) digits = digits.slice(2);
+    if (digits.startsWith("0")) digits = `229${digits.slice(1)}`;
+    if (!digits.startsWith("229") && digits.length <= 8) digits = `229${digits}`;
+    return digits;
+  }
+
+  function orderNotificationMessage(order, status) {
+    const product = orderProductName(order);
+    const customer = orderCustomer(order);
+
+    if (status === "confirmee") {
+      return [
+        `Bonjour ${customer},`,
+        "",
+        "Votre commande KEPAC a ete confirmee.",
+        `Produit : ${product}`,
+        "",
+        "Notre equipe vous contactera pour finaliser le paiement et la livraison.",
+        "Merci pour votre confiance."
+      ].join("\n");
+    }
+
+    if (status === "annulee") {
+      return [
+        `Bonjour ${customer},`,
+        "",
+        "Votre commande KEPAC a ete annulee.",
+        `Produit : ${product}`,
+        "",
+        "Vous pouvez nous contacter sur WhatsApp pour choisir un autre produit ou avoir plus d'informations."
+      ].join("\n");
+    }
+
+    return "";
+  }
+
+  function notifyClient(order, status) {
+    const phone = clientWhatsappNumber(order.telephone);
+    const message = orderNotificationMessage(order, status);
+    if (!phone || !message) return false;
+    window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, "_blank", "noopener");
+    return true;
+  }
+
   function orderDate(order) {
     if (!order.created_at) return "";
     return new Date(order.created_at).toLocaleDateString("fr-FR", {
@@ -214,6 +262,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/api/admin/commandes", { headers: adminHeaders(false) });
       const data = await readJsonResponse(response, "Commandes indisponibles.");
       const commandes = data.commandes || [];
+      currentOrders = commandes;
 
       if (orderCount) {
         orderCount.textContent = `${commandes.length} commande${commandes.length > 1 ? "s" : ""}`;
@@ -473,6 +522,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
       if (!response.ok || !data.succes) {
         throw new Error(data.message || "Statut impossible à modifier");
+      }
+
+      const order = currentOrders.find((item) => String(item.id) === String(select.dataset.orderStatus));
+      if (order && ["confirmee", "annulee"].includes(select.value)) {
+        const opened = notifyClient(order, select.value);
+        toast(opened ? "Statut mis a jour. WhatsApp est pret pour notifier le client." : "Statut mis a jour. Numero client invalide.");
+        await loadDashboard();
+        return;
       }
 
       toast("Statut de commande mis à jour.");
