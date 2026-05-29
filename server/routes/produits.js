@@ -6,6 +6,16 @@ const { upload, cloudinary } = require('../middlewares/upload');
 
 const router = express.Router();
 
+async function ensureImageHashColumn() {
+  try {
+    await db.query('ALTER TABLE produits ADD COLUMN image_hash VARCHAR(255) NULL');
+  } catch (error) {
+    if (!String(error.message || "").includes("Duplicate column")) {
+      throw error;
+    }
+  }
+}
+
 // Upload vers Cloudinary depuis le buffer memoire
 function uploadToCloudinary(buffer) {
   return new Promise((resolve, reject) => {
@@ -27,8 +37,9 @@ function uploadToCloudinary(buffer) {
 async function verifierDoublonImage(req, res, next) {
   if (!req.file) return next();
   try {
+    await ensureImageHashColumn();
     const result = await uploadToCloudinary(req.file.buffer);
-    console.log("CLOUDINARY RESULT:", JSON.stringify(result)); console.log("CLOUDINARY RESULT:", JSON.stringify(result)); const hash = result.etag || result.public_id || result.asset_id;
+    const hash = result.etag || result.public_id || result.asset_id;
 
     const [rows] = await db.query(
       'SELECT id, nom FROM produits WHERE image_hash = ? LIMIT 1',
@@ -73,6 +84,7 @@ router.post(
 // ROUTE : nettoyage des doublons existants
 router.post('/nettoyer-doublons', verifierToken, verifierAdmin, async (req, res) => {
   try {
+    await ensureImageHashColumn();
     const [doublons] = await db.query(`
       SELECT image_hash, COUNT(*) AS nb, MIN(id) AS id_a_garder
       FROM produits
@@ -116,6 +128,7 @@ router.post('/nettoyer-doublons', verifierToken, verifierAdmin, async (req, res)
 // ROUTE : migration hash pour produits existants
 router.post('/migrer-hash', verifierToken, verifierAdmin, async (req, res) => {
   try {
+    await ensureImageHashColumn();
     const [produits] = await db.query(
       `SELECT id, image FROM produits WHERE image IS NOT NULL AND image_hash IS NULL`
     );
@@ -235,6 +248,7 @@ router.get('/:id', async (req, res) => {
 // ROUTE : creer un produit
 router.post('/', verifierToken, verifierAdmin, async (req, res) => {
   try {
+    await ensureImageHashColumn();
     const {
       nom, description, prix, prix_promo, stock,
       categorie_id, taille, couleur, marque,
@@ -275,6 +289,7 @@ router.post('/', verifierToken, verifierAdmin, async (req, res) => {
 // ROUTE : modifier un produit
 router.put('/:id', verifierToken, verifierAdmin, async (req, res) => {
   try {
+    await ensureImageHashColumn();
     if (req.body.image_hash) {
       const [existe] = await db.query(
         'SELECT id, nom FROM produits WHERE image_hash = ? AND id != ? LIMIT 1',
