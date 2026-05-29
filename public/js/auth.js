@@ -157,6 +157,32 @@ document.addEventListener("DOMContentLoaded", () => {
         </section>
 
         <section class="profile-box profile-actions-panel">
+          <span class="eyebrow">SÃ©curitÃ©</span>
+          <h2>Modifier les accÃ¨s</h2>
+          <form data-account-form>
+            <div class="field">
+              <label for="accountEmail">Email admin</label>
+              <input id="accountEmail" name="email" type="email" value="${user.email || ""}" required>
+            </div>
+            <div class="field">
+              <label for="oldPassword">Ancien mot de passe</label>
+              <div class="password-row">
+                <input id="oldPassword" name="ancien_mot_de_passe" type="password" required>
+                <button class="icon-btn" type="button" data-toggle-password="#oldPassword"></button>
+              </div>
+            </div>
+            <div class="field">
+              <label for="newPassword">Nouveau mot de passe</label>
+              <div class="password-row">
+                <input id="newPassword" name="nouveau_mot_de_passe" type="password" placeholder="Laissez vide pour garder l'ancien">
+                <button class="icon-btn" type="button" data-toggle-password="#newPassword"></button>
+              </div>
+            </div>
+            <button class="btn btn-primary" type="submit">Enregistrer les accÃ¨s</button>
+          </form>
+        </section>
+
+        <section class="profile-box profile-actions-panel">
           <span class="eyebrow">Actions rapides</span>
           <h2>Besoin d'aide ?</h2>
           <p class="muted">Contactez KEPAC pour confirmer un produit, une taille, une disponibilité ou une livraison.</p>
@@ -168,6 +194,51 @@ document.addEventListener("DOMContentLoaded", () => {
         </section>
       </div>
     `;
+
+    profile.querySelectorAll("[data-toggle-password]").forEach((button) => {
+      setPasswordIcon(button, false);
+      button.addEventListener("click", () => {
+        const input = profile.querySelector(button.dataset.togglePassword);
+        if (!input) return;
+        const visible = input.type === "text";
+        input.type = visible ? "password" : "text";
+        setPasswordIcon(button, !visible);
+      });
+    });
+
+    profile.querySelector("[data-account-form]")?.addEventListener("submit", async (event) => {
+      event.preventDefault();
+      const form = event.currentTarget;
+      const formData = new FormData(form);
+
+      try {
+        const response = await fetch("/api/utilisateurs/compte", {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`
+          },
+          body: JSON.stringify({
+            email: formData.get("email"),
+            ancien_mot_de_passe: formData.get("ancien_mot_de_passe"),
+            nouveau_mot_de_passe: formData.get("nouveau_mot_de_passe")
+          })
+        });
+        const data = await response.json();
+
+        if (!response.ok || !data.succes) {
+          throw new Error(data.message || "Modification impossible");
+        }
+
+        localStorage.setItem("kepac-token", data.token);
+        localStorage.setItem("kepac-user", JSON.stringify(data.utilisateur));
+        form.reset();
+        toast("AccÃ¨s admin modifiÃ©s.");
+        window.setTimeout(() => location.reload(), 700);
+      } catch (error) {
+        toast(error.message);
+      }
+    });
 
     profile.querySelector("[data-logout]")?.addEventListener("click", () => {
       localStorage.removeItem("kepac-token");
