@@ -28,12 +28,9 @@ Donc l'adresse sera normalement `http://localhost:3000`.
 3. Importer ensuite `database/seed.sql`.
 4. Lancer le serveur Node depuis le dossier `server`.
 
-Compte admin de test :
+Compte admin :
 
-```txt
-Email : admin@kepac.com
-Mot de passe : Admin123!
-```
+Le mot de passe initial ne doit pas etre publie. Apres la premiere connexion, le proprietaire doit changer son email et son mot de passe dans la page Profil.
 
 ## API backend
 

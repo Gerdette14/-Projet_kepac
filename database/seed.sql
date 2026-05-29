@@ -9,7 +9,7 @@ UPDATE categories SET nom = 'Equipements topographiques', slug = 'equipements-to
 UPDATE categories SET nom = 'Chaussures', slug = 'chaussures', description = 'Chaussures de securite et de travail' WHERE id = 2;
 UPDATE categories SET nom = 'Vetements', slug = 'vetements', description = 'Chemises, pantalons, t-shirts et ensembles' WHERE id = 3;
 
--- Mot de passe admin : Admin123!
+-- Mot de passe admin initial : a changer apres la premiere connexion.
 INSERT IGNORE INTO utilisateurs (id, nom, prenom, email, mot_de_passe, role, telephone) VALUES
   (1, 'Admin', 'Kepac', 'admin@kepac.com',
    '$2b$10$FfDCqDV430kpT5sEml1tVuc9ACXgXPLPYNJUBFEUDPm5.hxL3qkZS',

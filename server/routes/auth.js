@@ -5,6 +5,35 @@ const db = require('../config/db');
 const { verifierToken } = require('../middlewares/auth');
 
 const router = express.Router();
+const loginAttempts = new Map();
+
+function loginKey(req, email = "") {
+  return `${req.ip || req.socket.remoteAddress || "unknown"}:${String(email).toLowerCase()}`;
+}
+
+function checkLoginLimit(req, email) {
+  const key = loginKey(req, email);
+  const now = Date.now();
+  const entry = loginAttempts.get(key);
+
+  if (!entry || now > entry.resetAt) {
+    loginAttempts.set(key, { count: 0, resetAt: now + 15 * 60 * 1000 });
+    return true;
+  }
+
+  return entry.count < 8;
+}
+
+function registerFailedLogin(req, email) {
+  const key = loginKey(req, email);
+  const entry = loginAttempts.get(key) || { count: 0, resetAt: Date.now() + 15 * 60 * 1000 };
+  entry.count += 1;
+  loginAttempts.set(key, entry);
+}
+
+function clearLoginAttempts(req, email) {
+  loginAttempts.delete(loginKey(req, email));
+}
 
 function creerToken(utilisateur) {
   return jwt.sign(
@@ -51,10 +80,18 @@ router.post('/connexion', async (req, res) => {
       });
     }
 
+    if (!checkLoginLimit(req, email)) {
+      return res.status(429).json({
+        succes: false,
+        message: 'Trop de tentatives. Reessayez dans quelques minutes.'
+      });
+    }
+
     const [rows] = await db.query('SELECT * FROM utilisateurs WHERE email = ?', [email]);
     const utilisateur = rows[0];
 
     if (!utilisateur || !(await bcrypt.compare(mot_de_passe, utilisateur.mot_de_passe))) {
+      registerFailedLogin(req, email);
       return res.status(401).json({
         succes: false,
         message: 'Identifiants incorrects'
@@ -67,6 +104,8 @@ router.post('/connexion', async (req, res) => {
         message: "Connexion réservée à l'administrateur"
       });
     }
+
+    clearLoginAttempts(req, email);
 
     res.json({
       succes: true,

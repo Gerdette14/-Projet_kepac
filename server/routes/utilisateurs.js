@@ -60,8 +60,8 @@ router.put('/compte', verifierToken, async (req, res) => {
     }
 
     if (nouveau_mot_de_passe) {
-      if (String(nouveau_mot_de_passe).length < 6) {
-        return res.status(400).json({ succes: false, message: 'Le nouveau mot de passe doit contenir au moins 6 caracteres' });
+      if (String(nouveau_mot_de_passe).length < 10) {
+        return res.status(400).json({ succes: false, message: 'Le nouveau mot de passe doit contenir au moins 10 caracteres' });
       }
       updates.push('mot_de_passe = ?');
       params.push(await bcrypt.hash(nouveau_mot_de_passe, 10));
