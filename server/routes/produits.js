@@ -3,7 +3,7 @@ const fs = require('fs');
 const crypto = require('crypto');
 const db = require('../config/db');
 const { verifierToken, verifierAdmin } = require('../middlewares/auth');
-const upload = require('../middlewares/upload');
+const { upload, cloudinary } = require('../middlewares/upload');
 
 const router = express.Router();
 
@@ -25,6 +25,7 @@ function calculerHashFichier(cheminFichier) {
 // ─────────────────────────────────────────────
 async function verifierDoublonImage(req, res, next) {
   if (!req.file) return next();
+  if (!req.file.path || !fs.existsSync(req.file.path)) return next();
 
   try {
     const hash = await calculerHashFichier(req.file.path);
@@ -66,7 +67,7 @@ router.post(
 
     res.status(201).json({
       succes: true,
-      image: `/images/uploads/${req.file.filename}`,
+      image: req.file.path || req.file.secure_url || `/images/uploads/${req.file.filename}`,
       image_hash: req.imageHash
     });
   }
@@ -292,7 +293,6 @@ router.post('/', verifierToken, verifierAdmin, async (req, res) => {
       couleur,
       marque,
       image,
-      image_hash,
       actif = 1
     } = req.body;
 
@@ -300,24 +300,10 @@ router.post('/', verifierToken, verifierAdmin, async (req, res) => {
       return res.status(400).json({ succes: false, message: 'Nom et prix obligatoires' });
     }
 
-    // Vérification doublon via hash si fourni
-    if (image_hash) {
-      const [existe] = await db.query(
-        'SELECT id, nom FROM produits WHERE image_hash = ? LIMIT 1',
-        [image_hash]
-      );
-      if (existe.length > 0) {
-        return res.status(409).json({
-          succes: false,
-          message: `Cette image est déjà utilisée par le produit "${existe[0].nom}" (id: ${existe[0].id})`
-        });
-      }
-    }
-
     const [resultat] = await db.query(
       `INSERT INTO produits
-       (nom, description, prix, prix_promo, stock, categorie_id, taille, couleur, marque, image, image_hash, actif)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+       (nom, description, prix, prix_promo, stock, categorie_id, taille, couleur, marque, image, actif)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
       [
         nom,
         description || null,
@@ -329,7 +315,6 @@ router.post('/', verifierToken, verifierAdmin, async (req, res) => {
         couleur || null,
         marque || null,
         image || null,
-        image_hash || null,
         actif
       ]
     );
@@ -347,24 +332,10 @@ router.put('/:id', verifierToken, verifierAdmin, async (req, res) => {
   try {
     const champs = [
       'nom', 'description', 'prix', 'prix_promo', 'stock',
-      'categorie_id', 'taille', 'couleur', 'marque', 'image', 'image_hash', 'actif'
+      'categorie_id', 'taille', 'couleur', 'marque', 'image', 'actif'
     ];
     const updates = [];
     const params = [];
-
-    // Vérification doublon sur image_hash si on change l'image
-    if (req.body.image_hash) {
-      const [existe] = await db.query(
-        'SELECT id, nom FROM produits WHERE image_hash = ? AND id != ? LIMIT 1',
-        [req.body.image_hash, req.params.id]
-      );
-      if (existe.length > 0) {
-        return res.status(409).json({
-          succes: false,
-          message: `Cette image est déjà utilisée par le produit "${existe[0].nom}" (id: ${existe[0].id})`
-        });
-      }
-    }
 
     champs.forEach((champ) => {
       if (Object.prototype.hasOwnProperty.call(req.body, champ)) {
