@@ -1,380 +1,196 @@
-const express = require('express');
-const db = require('../config/db');
-const { verifierToken, verifierAdmin } = require('../middlewares/auth');
-const { upload, cloudinary } = require('../middlewares/upload');
-
-const router = express.Router();
-
-// ─────────────────────────────────────────────
-// MIDDLEWARE : vérifie que l'image n'est pas un doublon
-// Cloudinary retourne le hash MD5 automatiquement dans req.file.etag
-// ─────────────────────────────────────────────
-async function verifierDoublonImage(req, res, next) {
-  if (!req.file) return next();
-
-  try {
-    // Cloudinary retourne l'etag (hash MD5) du fichier uploadé
-    const hash = req.file.etag || req.file.public_id;
-
-    const [rows] = await db.query(
-      'SELECT id, nom FROM produits WHERE image_hash = ? LIMIT 1',
-      [hash]
-    );
-
-    if (rows.length > 0) {
-      // Supprimer l'image déjà uploadée sur Cloudinary car c'est un doublon
-      await cloudinary.uploader.destroy(req.file.filename);
-      return res.status(409).json({
-        succes: false,
-        message: `Cette image est déjà utilisée par le produit "${rows[0].nom}" (id: ${rows[0].id})`
-      });
-    }
-
-    req.imageHash = hash;
-    next();
-  } catch (err) {
-    // En cas d'erreur, supprimer le fichier uploadé
-    if (req.file && req.file.filename) {
-      await cloudinary.uploader.destroy(req.file.filename).catch(() => {});
-    }
-    next(err);
+document.addEventListener("DOMContentLoaded", async () => {
+  if (window.kepacProductsReady) {
+    await window.kepacProductsReady;
   }
-}
 
-// ─────────────────────────────────────────────
-// ROUTE : upload image (avec détection de doublon)
-// ─────────────────────────────────────────────
-router.post(
-  '/upload',
-  verifierToken,
-  verifierAdmin,
-  upload.single('image'),
-  verifierDoublonImage,
-  (req, res) => {
-    if (!req.file) {
-      return res.status(400).json({ succes: false, message: 'Image obligatoire' });
+  const grid = document.querySelector("[data-catalog-products]");
+  const search = document.querySelector("[data-search]");
+  const category = document.querySelector("[data-category]");
+  const sort = document.querySelector("[data-sort]");
+  const count = document.querySelector("[data-result-count]");
+  const detail = document.querySelector("[data-product-detail]");
+  const segmentTabs = document.querySelector("[data-segment-tabs]");
+  let activeSegment = "Tous";
+
+  function clean(value = "") {
+    return String(value)
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .toLowerCase();
+  }
+
+  function familyOf(product) {
+    if (typeof productFamilyStrict === "function") {
+      return productFamilyStrict(product);
     }
 
-    res.status(201).json({
-      succes: true,
-      image: req.file.path,          // URL Cloudinary permanente
-      image_hash: req.imageHash
+    const categoryName = clean(product.category);
+    if (categoryName.includes("topographie")) return "Topographie";
+    if (categoryName.includes("vetement") || categoryName.includes("chaussure")) return "Mode";
+    return "Autres";
+  }
+
+  function matchesCategory(product, selectedCategory) {
+    const selected = clean(selectedCategory);
+    const productCategory = clean(product.category);
+
+    if (selected.includes("vetement")) return productCategory.includes("vetement");
+    if (selected.includes("chaussure")) return productCategory.includes("chaussure");
+    if (selected.includes("topographie")) return familyOf(product) === "Topographie";
+    return product.category === selectedCategory;
+  }
+
+  function catalogDisplayKey(product) {
+    if (product.image && typeof imageDisplayKey === "function") {
+      return imageDisplayKey(product.image);
+    }
+
+    return product.image
+      ? String(product.image).replace(/^\/+/, "").replace(/\\/g, "/").toLowerCase()
+      : clean(`${product.name || "produit"}-${product.id || ""}`);
+  }
+
+  function uniqueCatalogProducts(products) {
+    const seen = new Set();
+
+    return products.filter((product) => {
+      const key = catalogDisplayKey(product);
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
     });
   }
-);
 
-// ─────────────────────────────────────────────
-// ROUTE : nettoyage des doublons existants en base
-// Garde le produit le plus ancien, désactive les autres
-// ─────────────────────────────────────────────
-router.post('/nettoyer-doublons', verifierToken, verifierAdmin, async (req, res) => {
-  try {
-    const [doublons] = await db.query(`
-      SELECT image_hash, COUNT(*) AS nb, MIN(id) AS id_a_garder
-      FROM produits
-      WHERE image_hash IS NOT NULL AND actif = 1
-      GROUP BY image_hash
-      HAVING COUNT(*) > 1
-    `);
+  function removeDuplicateImageCards() {
+    if (!grid) return;
 
-    if (doublons.length === 0) {
-      return res.json({ succes: true, message: 'Aucun doublon trouvé', desactives: 0 });
-    }
+    const seenImages = new Set();
+    grid.querySelectorAll(".product-card").forEach((card) => {
+      const image = card.querySelector("img");
+      const rawSource = image?.getAttribute("src") || "";
+      const source = typeof imageDisplayKey === "function"
+        ? imageDisplayKey(rawSource)
+        : rawSource.replace(/^\/+/, "").replace(/\\/g, "/").toLowerCase();
 
-    let totalDesactives = 0;
-    const details = [];
+      if (!source) return;
+      if (seenImages.has(source)) {
+        card.remove();
+        return;
+      }
 
-    for (const doublon of doublons) {
-      const [produitsConcernes] = await db.query(
-        `SELECT id, nom FROM produits WHERE image_hash = ? AND id != ? AND actif = 1`,
-        [doublon.image_hash, doublon.id_a_garder]
+      seenImages.add(source);
+    });
+
+    grid.querySelectorAll(".catalog-group").forEach((group) => {
+      if (!group.querySelector(".product-card")) {
+        group.remove();
+      }
+    });
+  }
+
+  function filteredProducts() {
+    let list = [...PRODUCTS];
+    const term = clean(search?.value.trim());
+    const selectedCategory = category?.value;
+
+    if (term) {
+      list = list.filter((product) =>
+        clean(`${product.name} ${product.category} ${product.description}`).includes(term)
       );
-
-      const idsADesactiver = produitsConcernes.map((p) => p.id);
-
-      if (idsADesactiver.length > 0) {
-        await db.query(`UPDATE produits SET actif = 0 WHERE id IN (?)`, [idsADesactiver]);
-        totalDesactives += idsADesactiver.length;
-        details.push({
-          image_hash: doublon.image_hash,
-          id_conserve: doublon.id_a_garder,
-          ids_desactives: idsADesactiver,
-          noms_desactives: produitsConcernes.map((p) => p.nom)
-        });
-      }
     }
 
-    res.json({
-      succes: true,
-      message: `${totalDesactives} produit(s) en doublon désactivé(s)`,
-      desactives: totalDesactives,
-      details
-    });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
+    if (selectedCategory && selectedCategory !== "Tous") {
+      list = list.filter((product) => matchesCategory(product, selectedCategory));
+    }
+
+    if (activeSegment !== "Tous") {
+      list = list.filter((product) => familyOf(product) === activeSegment);
+    }
+
+    if (sort?.value === "name") {
+      list.sort((a, b) => a.name.localeCompare(b.name));
+    }
+
+    return list;
   }
-});
 
-// ─────────────────────────────────────────────
-// ROUTE : migration — remplit image_hash pour les produits existants
-// Pour les images déjà sur Cloudinary (URL contenant cloudinary.com)
-// ─────────────────────────────────────────────
-router.post('/migrer-hash', verifierToken, verifierAdmin, async (req, res) => {
-  try {
-    const [produits] = await db.query(
-      `SELECT id, image FROM produits WHERE image IS NOT NULL AND image_hash IS NULL`
-    );
-
-    let mis_a_jour = 0;
-    let echecs = 0;
-    const erreurs = [];
-
-    for (const produit of produits) {
-      try {
-        let hash = null;
-
-        if (produit.image && produit.image.includes('cloudinary.com')) {
-          // Extraire le public_id depuis l'URL Cloudinary
-          // Ex: https://res.cloudinary.com/drfkiyodx/image/upload/v123/kepac/produits/nom.jpg
-          const matches = produit.image.match(/\/upload\/(?:v\d+\/)?(.+?)(?:\.[^.]+)?$/);
-          if (matches) {
-            const publicId = matches[1];
-            // Récupérer les infos depuis Cloudinary pour obtenir l'etag
-            const info = await cloudinary.api.resource(publicId);
-            hash = info.etag || publicId;
-          }
-        } else {
-          // Image locale ancienne : utiliser l'URL comme hash temporaire
-          hash = require('crypto')
-            .createHash('md5')
-            .update(produit.image)
-            .digest('hex');
-        }
-
-        if (!hash) {
-          echecs++;
-          erreurs.push({ id: produit.id, raison: 'Impossible d\'extraire le hash' });
-          continue;
-        }
-
-        // Vérifier que ce hash n'est pas déjà pris
-        const [existe] = await db.query(
-          'SELECT id FROM produits WHERE image_hash = ? AND id != ? LIMIT 1',
-          [hash, produit.id]
-        );
-
-        if (existe.length > 0) {
-          echecs++;
-          erreurs.push({ id: produit.id, raison: `Hash déjà utilisé par le produit id ${existe[0].id}` });
-          continue;
-        }
-
-        await db.query('UPDATE produits SET image_hash = ? WHERE id = ?', [hash, produit.id]);
-        mis_a_jour++;
-      } catch (e) {
-        echecs++;
-        erreurs.push({ id: produit.id, raison: e.message });
-      }
-    }
-
-    res.json({
-      succes: true,
-      message: `Migration terminée : ${mis_a_jour} hash ajoutés, ${echecs} échec(s)`,
-      mis_a_jour,
-      echecs,
-      erreurs
-    });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
+  function groupedProducts(products) {
+    return [
+      { title: "Vêtements", segment: "Mode", products: products.filter((product) => clean(product.category).includes("vetement")) },
+      { title: "Chaussures", segment: "Mode", products: products.filter((product) => clean(product.category).includes("chaussure")) },
+      { title: "Topographie", segment: "Topographie", products: products.filter((product) => familyOf(product) === "Topographie") }
+    ].filter((group) => group.products.length);
   }
-});
 
-// ─────────────────────────────────────────────
-// ROUTE : liste des produits
-// ─────────────────────────────────────────────
-router.get('/', async (req, res) => {
-  try {
-    const { recherche, categorie, actif = '1' } = req.query;
-    const params = [];
-    const conditions = [];
-
-    if (actif !== 'tous') {
-      conditions.push('p.actif = ?');
-      params.push(Number(actif));
-    }
-
-    if (recherche) {
-      conditions.push('(p.nom LIKE ? OR p.description LIKE ? OR p.marque LIKE ?)');
-      params.push(`%${recherche}%`, `%${recherche}%`, `%${recherche}%`);
-    }
-
-    if (categorie) {
-      conditions.push('(c.slug = ? OR c.nom = ? OR p.categorie_id = ?)');
-      params.push(categorie, categorie, Number(categorie) || 0);
-    }
-
-    const where = conditions.length ? `WHERE ${conditions.join(' AND ')}` : '';
-    const [produits] = await db.query(
-      `SELECT p.*, c.nom AS categorie_nom, c.slug AS categorie_slug
-       FROM produits p
-       LEFT JOIN categories c ON c.id = p.categorie_id
-       ${where}
-       ORDER BY p.created_at DESC`,
-      params
-    );
-
-    res.json({ succes: true, total: produits.length, produits });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
+  function groupSection(group) {
+    return `
+      <section class="catalog-group">
+        <div class="catalog-group-head">
+          <div>
+            <span class="eyebrow">${group.segment}</span>
+            <h2>${group.title}</h2>
+          </div>
+          <span class="tag">${group.products.length} produit${group.products.length > 1 ? "s" : ""}</span>
+        </div>
+        <div class="product-grid">${group.products.map(productCard).join("")}</div>
+      </section>
+    `;
   }
-});
 
-// ─────────────────────────────────────────────
-// ROUTE : liste des catégories
-// ─────────────────────────────────────────────
-router.get('/categories/liste', async (req, res) => {
-  try {
-    const [categories] = await db.query(
-      `SELECT id, nom, slug, description
-       FROM categories
-       ORDER BY parent_id IS NOT NULL, nom`
-    );
+  function renderCatalog() {
+    if (!grid) return;
+    const list = uniqueCatalogProducts(filteredProducts());
 
-    res.json({ succes: true, categories });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
-  }
-});
-
-// ─────────────────────────────────────────────
-// ROUTE : détail d'un produit
-// ─────────────────────────────────────────────
-router.get('/:id', async (req, res) => {
-  try {
-    const [rows] = await db.query(
-      `SELECT p.*, c.nom AS categorie_nom, c.slug AS categorie_slug
-       FROM produits p
-       LEFT JOIN categories c ON c.id = p.categorie_id
-       WHERE p.id = ?`,
-      [req.params.id]
-    );
-
-    if (!rows.length) {
-      return res.status(404).json({ succes: false, message: 'Produit introuvable' });
+    if (!list.length) {
+      grid.innerHTML = `<div class="empty-state"><h3>Aucun produit trouvé</h3><p class="muted">Essayez une autre recherche ou catégorie.</p></div>`;
+    } else if (activeSegment === "Tous" && !search?.value.trim() && (!category?.value || category.value === "Tous")) {
+      grid.innerHTML = groupedProducts(list).map(groupSection).join("");
+    } else {
+      grid.innerHTML = list.map(productCard).join("");
     }
 
-    res.json({ succes: true, produit: rows[0] });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
-  }
-});
-
-// ─────────────────────────────────────────────
-// ROUTE : créer un produit
-// ─────────────────────────────────────────────
-router.post('/', verifierToken, verifierAdmin, async (req, res) => {
-  try {
-    const {
-      nom, description, prix, prix_promo, stock,
-      categorie_id, taille, couleur, marque,
-      image, image_hash, actif = 1
-    } = req.body;
-
-    if (!nom || prix === undefined) {
-      return res.status(400).json({ succes: false, message: 'Nom et prix obligatoires' });
+    if (count) {
+      count.textContent = `${list.length} produit${list.length > 1 ? "s" : ""}`;
     }
 
-    // Double protection : vérifier le hash avant insertion
-    if (image_hash) {
-      const [existe] = await db.query(
-        'SELECT id, nom FROM produits WHERE image_hash = ? LIMIT 1',
-        [image_hash]
-      );
-      if (existe.length > 0) {
-        return res.status(409).json({
-          succes: false,
-          message: `Cette image est déjà utilisée par le produit "${existe[0].nom}" (id: ${existe[0].id})`
-        });
-      }
-    }
-
-    const [resultat] = await db.query(
-      `INSERT INTO produits
-       (nom, description, prix, prix_promo, stock, categorie_id, taille, couleur, marque, image, image_hash, actif)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [
-        nom, description || null, prix, prix_promo || null,
-        stock || 0, categorie_id || null, taille || null,
-        couleur || null, marque || null,
-        image || null, image_hash || null, actif
-      ]
-    );
-
-    res.status(201).json({ succes: true, message: 'Produit cree', id: resultat.insertId });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
+    removeDuplicateImageCards();
   }
-});
 
-// ─────────────────────────────────────────────
-// ROUTE : modifier un produit
-// ─────────────────────────────────────────────
-router.put('/:id', verifierToken, verifierAdmin, async (req, res) => {
-  try {
-    // Vérification doublon si on change l'image
-    if (req.body.image_hash) {
-      const [existe] = await db.query(
-        'SELECT id, nom FROM produits WHERE image_hash = ? AND id != ? LIMIT 1',
-        [req.body.image_hash, req.params.id]
-      );
-      if (existe.length > 0) {
-        return res.status(409).json({
-          succes: false,
-          message: `Cette image est déjà utilisée par le produit "${existe[0].nom}" (id: ${existe[0].id})`
-        });
-      }
-    }
-
-    const champs = [
-      'nom', 'description', 'prix', 'prix_promo', 'stock',
-      'categorie_id', 'taille', 'couleur', 'marque', 'image', 'image_hash', 'actif'
-    ];
-    const updates = [];
-    const params = [];
-
-    champs.forEach((champ) => {
-      if (Object.prototype.hasOwnProperty.call(req.body, champ)) {
-        updates.push(`${champ} = ?`);
-        params.push(req.body[champ]);
-      }
-    });
-
-    if (!updates.length) {
-      return res.status(400).json({ succes: false, message: 'Aucune modification envoyee' });
-    }
-
-    params.push(req.params.id);
-    const [resultat] = await db.query(
-      `UPDATE produits SET ${updates.join(', ')} WHERE id = ?`,
-      params
-    );
-
-    res.json({ succes: true, message: 'Produit modifie', lignes: resultat.affectedRows });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
+  function renderDetail() {
+    if (!detail) return;
+    const id = Number(new URLSearchParams(location.search).get("id")) || 1;
+    const product = PRODUCTS.find((item) => Number(item.id) === id) || PRODUCTS[0];
+    detail.innerHTML = `
+      <div class="hero-media">
+        <img src="${product.image}" alt="${product.name}" onerror="this.src='${fallbackImage(product.id)}'">
+      </div>
+      <div>
+        <span class="eyebrow">${displayCategoryName(product.category)}</span>
+        <h1>${product.name}</h1>
+        <div class="product-price product-detail-price">${formatPrice(product.price)}</div>
+        <p class="lead">${product.description} Sélection contrôlée, préparation rapide et accompagnement client avant la livraison.</p>
+        <div class="hero-actions">
+          <a class="btn btn-primary" href="${orderLink(product)}">Commander en ligne</a>
+          <a class="btn btn-secondary" href="${whatsappLink(product)}" target="_blank" rel="noopener">Commander sur WhatsApp</a>
+          <a class="btn btn-ghost" href="catalogue.html">Voir le catalogue</a>
+        </div>
+      </div>
+    `;
   }
-});
 
-// ─────────────────────────────────────────────
-// ROUTE : désactiver un produit (soft delete)
-// ─────────────────────────────────────────────
-router.delete('/:id', verifierToken, verifierAdmin, async (req, res) => {
-  try {
-    const [resultat] = await db.query('UPDATE produits SET actif = 0 WHERE id = ?', [req.params.id]);
-    res.json({ succes: true, message: 'Produit desactive', lignes: resultat.affectedRows });
-  } catch (error) {
-    res.status(500).json({ succes: false, message: error.message });
-  }
-});
+  [search, category, sort].forEach((control) => {
+    control?.addEventListener("input", renderCatalog);
+  });
 
-module.exports = router;
+  segmentTabs?.addEventListener("click", (event) => {
+    const button = event.target.closest("[data-segment]");
+    if (!button) return;
+    activeSegment = button.dataset.segment;
+    segmentTabs.querySelectorAll("[data-segment]").forEach((item) => item.classList.remove("active"));
+    button.classList.add("active");
+    renderCatalog();
+  });
+
+  renderCatalog();
+  renderDetail();
+});
