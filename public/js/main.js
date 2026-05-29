@@ -300,7 +300,12 @@ function cleanText(value = "") {
 }
 
 function inferCategoryStrict(product) {
+  const categoryOnly = cleanText(product.category || "");
   const text = cleanText(`${product.category || ""} ${product.name || ""} ${product.description || ""}`);
+
+  if (textHasAny(categoryOnly, ["autre", "divers"])) {
+    return "Autres";
+  }
 
   if (
     isTopographyImage(product.image) ||
@@ -466,7 +471,12 @@ function productDisplayKey(product) {
 }
 
 function productDisplayFamily(product) {
+  const categoryOnly = cleanText(product.category || "");
   const text = cleanText(`${product.category || ""} ${product.name || ""} ${product.description || ""}`);
+
+  if (textHasAny(categoryOnly, ["autre", "divers"])) {
+    return "autres";
+  }
 
   if (textHasAny(text, ["topo", "laser", "prisme", "gnss", "gps", "station", "niveau", "mesure", "apeks", "coffret", "equipement"])) {
     return "topographie";

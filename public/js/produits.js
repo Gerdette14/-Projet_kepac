@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (selected.includes("vetement")) return productCategory.includes("vetement");
     if (selected.includes("chaussure")) return productCategory.includes("chaussure");
     if (selected.includes("topographie")) return familyOf(product) === "Topographie";
+    if (selected.includes("autre")) return familyOf(product) === "Autres" || productCategory.includes("autre");
     return product.category === selectedCategory;
   }
 
@@ -133,7 +134,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     return [
       { title: "Vêtements", segment: "Mode", products: products.filter((product) => clean(product.category).includes("vetement")) },
       { title: "Chaussures", segment: "Mode", products: products.filter((product) => clean(product.category).includes("chaussure")) },
-      { title: "Topographie", segment: "Topographie", products: products.filter((product) => familyOf(product) === "Topographie") }
+      { title: "Topographie", segment: "Topographie", products: products.filter((product) => familyOf(product) === "Topographie") },
+      { title: "Autres produits", segment: "Autres", products: products.filter((product) => familyOf(product) === "Autres" || clean(product.category).includes("autre")) }
     ].filter((group) => group.products.length);
   }
 
