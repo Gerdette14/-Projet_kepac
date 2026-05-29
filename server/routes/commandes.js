@@ -4,10 +4,44 @@ const { verifierToken } = require('../middlewares/auth');
 
 const router = express.Router();
 
+async function ensureCommandeTables(connection) {
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS commandes (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      utilisateur_id INT NULL,
+      total DECIMAL(10, 2) NOT NULL DEFAULT 0,
+      statut ENUM('en_attente','confirmee','en_preparation','expediee','livree','annulee') NOT NULL DEFAULT 'en_attente',
+      mode_paiement ENUM('mobile_money','carte','virement','a_la_livraison') NOT NULL DEFAULT 'mobile_money',
+      statut_paiement ENUM('non_paye','paye','rembourse') NOT NULL DEFAULT 'non_paye',
+      adresse_livraison VARCHAR(255) NOT NULL,
+      ville VARCHAR(100) NOT NULL,
+      telephone VARCHAR(20) NOT NULL,
+      notes TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+
+  await connection.query(`
+    CREATE TABLE IF NOT EXISTS commande_items (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      commande_id INT NOT NULL,
+      produit_id INT NULL,
+      nom_produit VARCHAR(200) NOT NULL,
+      quantite INT NOT NULL DEFAULT 1,
+      prix_unitaire DECIMAL(10, 2) NOT NULL,
+      taille VARCHAR(50),
+      couleur VARCHAR(50)
+    )
+  `);
+}
+
 router.post('/', async (req, res) => {
   const connection = await db.getConnection();
 
   try {
+    await ensureCommandeTables(connection);
+
     const {
       utilisateur_id,
       items,
@@ -105,6 +139,8 @@ router.post('/', async (req, res) => {
 
 router.get('/mes-commandes', verifierToken, async (req, res) => {
   try {
+    await ensureCommandeTables(db);
+
     const [commandes] = await db.query(
       'SELECT * FROM commandes WHERE utilisateur_id = ? ORDER BY created_at DESC',
       [req.utilisateur.id]
@@ -118,6 +154,8 @@ router.get('/mes-commandes', verifierToken, async (req, res) => {
 
 router.get('/:id', async (req, res) => {
   try {
+    await ensureCommandeTables(db);
+
     const [commandes] = await db.query('SELECT * FROM commandes WHERE id = ?', [req.params.id]);
     if (!commandes.length) {
       return res.status(404).json({ succes: false, message: 'Commande introuvable' });
