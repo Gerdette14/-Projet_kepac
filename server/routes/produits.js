@@ -28,7 +28,7 @@ async function verifierDoublonImage(req, res, next) {
   if (!req.file) return next();
   try {
     const result = await uploadToCloudinary(req.file.buffer);
-    console.log("CLOUDINARY RESULT:", JSON.stringify(result)); const hash = result.etag || result.public_id || result.asset_id;
+    console.log("CLOUDINARY RESULT:", JSON.stringify(result)); console.log("CLOUDINARY RESULT:", JSON.stringify(result)); const hash = result.etag || result.public_id || result.asset_id;
 
     const [rows] = await db.query(
       'SELECT id, nom FROM produits WHERE image_hash = ? LIMIT 1',
