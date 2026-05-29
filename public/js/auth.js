@@ -147,8 +147,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
       <div class="profile-layout">
         <section class="profile-box profile-details">
-          <span class="eyebrow">Compte</span>
-          <h2>Informations</h2>
+          <span class="eyebrow">Profil admin</span>
+          <h2>Coordonnees du proprietaire</h2>
           <div class="profile-info-list">
             <div><span>Nom</span><strong>${fullName}</strong></div>
             <div><span>Email</span><strong>${user.email || "Non renseigné"}</strong></div>
@@ -157,8 +157,8 @@ document.addEventListener("DOMContentLoaded", () => {
         </section>
 
         <section class="profile-box profile-actions-panel">
-          <span class="eyebrow">SÃ©curitÃ©</span>
-          <h2>Modifier les accÃ¨s</h2>
+          <span class="eyebrow">Securite admin</span>
+          <h2>Changer l'email ou le mot de passe</h2>
           <form data-account-form>
             <div class="field">
               <label for="accountEmail">Email admin</label>
@@ -178,7 +178,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 <button class="icon-btn" type="button" data-toggle-password="#newPassword"></button>
               </div>
             </div>
-            <button class="btn btn-primary" type="submit">Enregistrer les accÃ¨s</button>
+            <button class="btn btn-primary" type="submit">Enregistrer les nouveaux acces</button>
           </form>
         </section>
 
