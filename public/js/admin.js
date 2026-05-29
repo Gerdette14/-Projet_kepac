@@ -167,8 +167,12 @@ document.addEventListener("DOMContentLoaded", () => {
     let digits = String(phone).replace(/\D/g, "");
     if (!digits) return "";
     if (digits.startsWith("00")) digits = digits.slice(2);
-    if (digits.startsWith("0")) digits = `229${digits.slice(1)}`;
-    if (!digits.startsWith("229") && digits.length <= 8) digits = `229${digits}`;
+
+    if (digits.startsWith("229")) return digits;
+    if (digits.startsWith("0")) return `229${digits}`;
+    if (digits.length === 8) return `22901${digits}`;
+    if (digits.length === 10 && digits.startsWith("01")) return `229${digits}`;
+
     return digits;
   }
 
