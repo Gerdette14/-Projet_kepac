@@ -67,7 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const seenImages = new Set();
     grid.querySelectorAll(".product-card").forEach((card) => {
       const image = card.querySelector("img");
-      const rawSource = image?.getAttribute("src") || "";
+      const rawSource = image?.currentSrc || image?.src || image?.getAttribute("src") || "";
       const source = typeof imageDisplayKey === "function"
         ? imageDisplayKey(rawSource)
         : rawSource.replace(/^\/+/, "").replace(/\\/g, "/").toLowerCase();
@@ -85,6 +85,14 @@ document.addEventListener("DOMContentLoaded", async () => {
       if (!group.querySelector(".product-card")) {
         group.remove();
       }
+    });
+  }
+
+  function watchImageDuplicates() {
+    if (!grid) return;
+    grid.querySelectorAll(".product-card img").forEach((image) => {
+      image.addEventListener("load", removeDuplicateImageCards, { once: true });
+      image.addEventListener("error", removeDuplicateImageCards, { once: true });
     });
   }
 
@@ -154,6 +162,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
 
     removeDuplicateImageCards();
+    watchImageDuplicates();
   }
 
   function renderDetail() {
