@@ -46,7 +46,7 @@ function toast(message) {
 }
 
 function fallbackImage(productId) {
-  return PRODUCT_IMAGES[(Number(productId) - 1) % PRODUCT_IMAGES.length] || PRODUCT_IMAGES[0];
+  return "images/kepac-logo.svg";
 }
 
 function fallbackPrice(productId) {
