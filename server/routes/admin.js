@@ -79,4 +79,26 @@ router.put('/commandes/:id/statut', async (req, res) => {
   }
 });
 
+router.delete('/commandes/:id', async (req, res) => {
+  const connection = await db.getConnection();
+
+  try {
+    await connection.beginTransaction();
+    await connection.query('DELETE FROM commande_items WHERE commande_id = ?', [req.params.id]);
+    const [resultat] = await connection.query('DELETE FROM commandes WHERE id = ?', [req.params.id]);
+    await connection.commit();
+
+    res.json({
+      succes: true,
+      message: 'Commande supprimee',
+      lignes: resultat.affectedRows
+    });
+  } catch (error) {
+    await connection.rollback();
+    res.status(500).json({ succes: false, message: error.message });
+  } finally {
+    connection.release();
+  }
+});
+
 module.exports = router;

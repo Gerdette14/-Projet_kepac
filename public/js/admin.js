@@ -247,6 +247,7 @@ document.addEventListener("DOMContentLoaded", () => {
           <p class="muted">${orderCustomer(order)} - ${order.telephone || "Téléphone non renseigné"} - ${orderNetwork(order)}</p>
           <p class="muted">${total}${orderDate(order) ? ` - ${orderDate(order)}` : ""}</p>
         </div>
+        <div class="admin-order-actions">
         <select class="admin-order-status" data-order-status="${order.id}">
           <option value="en_attente" ${order.statut === "en_attente" ? "selected" : ""}>En attente</option>
           <option value="confirmee" ${order.statut === "confirmee" ? "selected" : ""}>Confirmée</option>
@@ -255,6 +256,8 @@ document.addEventListener("DOMContentLoaded", () => {
           <option value="livree" ${order.statut === "livree" ? "selected" : ""}>Livrée</option>
           <option value="annulee" ${order.statut === "annulee" ? "selected" : ""}>Annulée</option>
         </select>
+        <button class="btn btn-danger" type="button" data-delete-order="${order.id}">Supprimer</button>
+        </div>
       </article>
     `;
   }
@@ -541,6 +544,32 @@ document.addEventListener("DOMContentLoaded", () => {
     } catch (error) {
       toast(error.message);
       await loadOrders();
+    }
+  });
+
+  orderList?.addEventListener("click", async (event) => {
+    const deleteButton = event.target.closest("[data-delete-order]");
+    if (!deleteButton) return;
+
+    const order = currentOrders.find((item) => String(item.id) === String(deleteButton.dataset.deleteOrder));
+    const confirmed = window.confirm(`Supprimer la commande #${deleteButton.dataset.deleteOrder}${order ? ` de ${orderCustomer(order)}` : ""} ?`);
+    if (!confirmed) return;
+
+    try {
+      const response = await fetch(`/api/admin/commandes/${deleteButton.dataset.deleteOrder}`, {
+        method: "DELETE",
+        headers: adminHeaders(false)
+      });
+      const data = await readJsonResponse(response, "Suppression de commande indisponible.");
+
+      if (!response.ok || !data.succes) {
+        throw new Error(data.message || "Commande impossible à supprimer");
+      }
+
+      toast("Commande supprimée.");
+      await loadDashboard();
+    } catch (error) {
+      toast(error.message);
     }
   });
 

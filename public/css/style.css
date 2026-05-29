@@ -610,6 +610,15 @@ h3 {
   font-weight: 800;
 }
 
+.admin-order-actions {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-order-actions .btn {
+  width: 100%;
+}
+
 .admin-product-row img {
   width: 74px;
   aspect-ratio: 1;
